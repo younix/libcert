@@ -1,0 +1,6 @@
+cert
+cert-static
+*.o
+*.a
+*.so
+*.swp
