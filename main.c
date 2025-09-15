@@ -23,7 +23,7 @@
 void
 usage(void)
 {
-	fputs("cert [-v] [file]\n", stderr);
+	fputs("cert [-vh] [file]\n", stderr);
 	exit(1);
 }
 
