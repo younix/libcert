@@ -1,3 +1,5 @@
+#include <err.h>
+#include <stdio.h>
 #include <unistd.h>
 
 #include "cert.h"
@@ -5,7 +7,7 @@
 void
 usage(void)
 {
-	fputs("cert [-v]\n", stderr);
+	fputs("cert [-v] [file]\n", stderr);
 	exit(1);
 }
 
@@ -36,6 +38,20 @@ main(int argc, char *argv[])
 
 	if (verbose)
 		X509_print_fp(stdout, cert->x509);
+
+	if (argc == 1) {
+		FILE *fh;
+		char *path = argv[0];
+
+		if ((fh = fopen(path, "w")) == NULL)
+			err(1, "%s", path);
+
+		if (PEM_write_X509(fh, cert->x509) == 0)
+			err(1, "%s", path);
+
+		if (fclose(fh) == EOF)
+			err(1, "%s", path);
+	}
 
 	cert_free(cert);
 
