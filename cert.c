@@ -20,6 +20,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <time.h>
 
 #include <openssl/asn1.h>
@@ -428,6 +429,81 @@ cert_from_subject_and_issuer_key(struct cert *cert, EVP_PKEY *subject_key, EVP_P
 	cert_sign(cert->x509, issuer_key);
 
 	return 1;
+}
+
+/* Get memory pointer of x509 object. */
+int
+cert_crt_data(struct cert *cert, uint8_t **data, size_t *size)
+{
+	BIO	*bio;
+	BUF_MEM	 mem;
+
+	memset(&mem, 0, sizeof mem);
+	if ((bio = BIO_new(BIO_s_mem())) == NULL) {
+		cert->errstr = "BIO_new";
+		return 0;
+	}
+
+	if (BIO_set_mem_buf(bio, &mem, BIO_NOCLOSE) <= 0) {
+		cert->errstr = "BIO_set_mem_buf";
+		goto err;
+	}
+
+	if (PEM_write_bio_X509(bio, cert->x509) == 0) {
+		cert->errstr = "PEM_write_bio_X509";
+		goto err;
+	}
+
+	if (BIO_free(bio) == 0) {
+		cert->errstr = "BIO_free";
+		return 0;
+	}
+
+	*data = (uint8_t *)mem.data;
+	*size = mem.length;
+
+	return 1;
+ err:
+	BIO_free(bio);
+	return 0;
+}
+
+/* Get memory pointer of pkey object. */
+int
+cert_key_data(struct cert *cert, uint8_t **data, size_t *size)
+{
+	BIO	*bio;
+	BUF_MEM	 mem;
+
+	memset(&mem, 0, sizeof mem);
+	if ((bio = BIO_new(BIO_s_mem())) == NULL) {
+		cert->errstr = "BIO_new";
+		return 0;
+	}
+
+	if (BIO_set_mem_buf(bio, &mem, BIO_NOCLOSE) <= 0) {
+		cert->errstr = "BIO_set_mem_buf";
+		goto err;
+	}
+
+	if (PEM_write_bio_PrivateKey(bio, cert->key, NULL, NULL, 0, NULL,
+	   NULL) == 0) {
+		cert->errstr = "PEM_write_bio_PrivateKey";
+		return 0;
+	}
+
+	if (BIO_free(bio) == 0) {
+		cert->errstr = "BIO_free";
+		return 0;
+	}
+
+	*data = (uint8_t *)mem.data;
+	*size = mem.length;
+
+	return 1;
+ err:
+	BIO_free(bio);
+	return 0;
 }
 
 struct cert_config *

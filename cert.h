@@ -38,5 +38,7 @@ struct cert *
 	cert_create(struct cert_config *);
 void	cert_config_free(struct cert_config *);
 void	cert_free(struct cert *);
+int	cert_crt_data(struct cert *, uint8_t **, size_t *);
+int	cert_key_data(struct cert *, uint8_t **, size_t *);
 
 #endif
