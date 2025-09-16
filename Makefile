@@ -28,9 +28,13 @@ bytestring/bs_cbb.o: bytestring/bs_cbb.c
 bytestring/bs_cbs.o: bytestring/bs_cbs.c
 	$(CC) -c $(CFLAGS) -o $@ bytestring/bs_cbs.c
 
+test/connect: test/connect.c
+	$(CC) -o $@ $(CFLAGS) $(LDFLAGS) test/connect.c -L. -lcert -ltls
+
 clean:
 	rm -f *.a *.so $(OBJ) cert cert-static
 
-test: cert cert-static
+test: cert cert-static test/connect
 	LD_LIBRARY_PATH=. ./cert
 	./cert-static
+	LD_LIBRARY_PATH=. test/connect
