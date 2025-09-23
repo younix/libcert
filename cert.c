@@ -413,8 +413,8 @@ cert_set_authority_info_access(struct cert *cert, enum cert_kind kind)
 	return 1;
 }
 
-static void
-cert_set_subject_info_access(X509 *cert, enum cert_kind kind)
+static int
+cert_set_subject_info_access(struct cert *cert, enum cert_kind kind)
 {
 	X509_EXTENSION *ext;
 	const struct access_method *ams;
@@ -448,11 +448,15 @@ cert_set_subject_info_access(X509 *cert, enum cert_kind kind)
 		nams = sizeof(ca_ams) / sizeof(ca_ams[0]);
 	}
 
-	if ((ext = ext_subject_info_access_new(ams, nams)) == NULL)
-		errx(1, "ext_subject_info_access_new");
+	if ((ext = ext_subject_info_access_new(ams, nams)) == NULL) {
+		cert->errstr = "ext_subject_info_access_new";
+		return 0;
+	}
 
-	cert_add_extension(cert, ext);
+	cert_add_extension(cert->x509, ext);
 	ext = NULL;
+
+	return 1;
 }
 
 static void
@@ -486,7 +490,8 @@ cert_set_extensions(struct cert *cert, enum cert_kind kind,
 		return 0;
 	if (!cert_set_authority_info_access(cert, kind))
 		return 0;
-	cert_set_subject_info_access(cert->x509, kind);
+	if (!cert_set_subject_info_access(cert, kind))
+		return 0;
 	cert_set_certificate_policies(cert->x509);
 
 	return 1;
