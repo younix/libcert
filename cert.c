@@ -61,8 +61,8 @@ cert_generate_keys(struct cert *cert)
 	return 1;
 }
 
-static void
-cert_set_common_name(EVP_PKEY *pkey, X509_NAME **out_name)
+static int
+cert_set_common_name(struct cert *cert, EVP_PKEY *pkey, X509_NAME **out_name)
 {
 	X509_NAME *name = NULL;
 	unsigned char md[EVP_MAX_MD_SIZE];
@@ -70,29 +70,38 @@ cert_set_common_name(EVP_PKEY *pkey, X509_NAME **out_name)
 
 	*out_name = NULL;
 
-	if (!key_identifier(pkey, md, &md_len))
-		errx(1, "%s: key_identifier", __func__);
+	if (!key_identifier(pkey, md, &md_len)) {
+		cert->errstr = "cert_set_common_name: key_identifier";
+		return 0;
+	}
 
-	if ((name = X509_NAME_new()) == NULL)
-		errx(1, "X509_NAME_new");
+	if ((name = X509_NAME_new()) == NULL) {
+		cert->errstr = "X509_NAME_new";
+		return 0;
+	}
 
 	if (!X509_NAME_add_entry_by_NID(name, NID_commonName,
-	    V_ASN1_PRINTABLESTRING, (unsigned char *)"localhost", -1, -1, 0))
-		errx(1, "X509_NAME_add_entry_by_NID");
+	    V_ASN1_PRINTABLESTRING, (unsigned char *)"localhost", -1, -1, 0)) {
+		cert->errstr = "X509_NAME_add_entry_by_NID";
+		return 0;
+	}
 
 	*out_name = name;
+
+	return 1;
 }
 
-static void
-cert_issuer_from_key(EVP_PKEY *pkey, X509_NAME **out_issuer)
+static int
+cert_issuer_from_key(struct cert *cert, EVP_PKEY *pkey, X509_NAME **out_issuer)
 {
-	cert_set_common_name(pkey, out_issuer);
+	return cert_set_common_name(cert, pkey, out_issuer);
 }
 
-static void
-cert_subject_from_key(EVP_PKEY *pkey, X509_NAME **out_subject)
+static int
+cert_subject_from_key(struct cert *cert, EVP_PKEY *pkey,
+    X509_NAME **out_subject)
 {
-	cert_set_common_name(pkey, out_subject);
+	return cert_set_common_name(cert, pkey, out_subject);
 }
 
 int
@@ -158,7 +167,9 @@ cert_set_issuer(struct cert *cert, EVP_PKEY *issuer_key)
 {
 	X509_NAME *issuer;
 
-	cert_issuer_from_key(issuer_key, &issuer);
+	if (!cert_issuer_from_key(cert, issuer_key, &issuer))
+		return 0;
+
 	if (!X509_set_issuer_name(cert->x509, issuer)) {
 		cert->errstr = "X509_set_issuer_name";
 		X509_NAME_free(issuer);
