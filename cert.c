@@ -245,11 +245,15 @@ cert_set_validity(struct cert *cert, enum cert_kind kind)
 	return 1;
 }
 
-static void
-cert_set_subject_public_key_info(X509 *cert, EVP_PKEY *subject_key)
+static int
+cert_set_subject_public_key_info(struct cert *cert, EVP_PKEY *subject_key)
 {
-	if (!X509_set_pubkey(cert, subject_key))
-		errx(1, "X509_set_pubkey");
+	if (!X509_set_pubkey(cert->x509, subject_key)) {
+		cert->errstr = "X509_set_pubkey";
+		return 0;
+	}
+
+	return 1;
 }
 
 static void
@@ -480,7 +484,8 @@ cert_from_subject_and_issuer_key(struct cert *cert, EVP_PKEY *subject_key, EVP_P
 		return 0;
 	if (!cert_set_validity(cert, kind))
 		return 0;
-	cert_set_subject_public_key_info(cert->x509, subject_key);
+	if (!cert_set_subject_public_key_info(cert, subject_key))
+		return 0;
 	cert_set_extensions(cert->x509, kind, subject_key, issuer_key);
 
 	cert_sign(cert->x509, issuer_key);
