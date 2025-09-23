@@ -118,28 +118,39 @@ cert_set_version(struct cert *cert)
 	return 1;
 }
 
-static void
-cert_set_serial_number(X509 *cert)
+static int
+cert_set_serial_number(struct cert *cert)
 {
 	BIGNUM *bn;
 	ASN1_INTEGER *serialNumber;
 
 	/* XXX - choose a random number in [1..2^159 - 1] for now. */
-	if ((bn = BN_new()) == NULL)
-		errx(1, "BN_new");
+	if ((bn = BN_new()) == NULL) {
+		cert->errstr = "BN_new";
+		return 0;
+	}
+
 	do {
-		if (!BN_rand(bn, 159, BN_RAND_TOP_ANY, BN_RAND_BOTTOM_ANY))
-			errx(1, "BN_rand");
+		if (!BN_rand(bn, 159, BN_RAND_TOP_ANY, BN_RAND_BOTTOM_ANY)) {
+			cert->errstr = "BN_rand";
+			return 0;
+		}
 	} while (BN_is_zero(bn));
 
-	if ((serialNumber = BN_to_ASN1_INTEGER(bn, NULL)) == NULL)
-		errx(1, "BN_to_ASN1_INTEGER");
+	if ((serialNumber = BN_to_ASN1_INTEGER(bn, NULL)) == NULL) {
+		cert->errstr = "BN_to_ASN1_INTEGER";
+		return 0;
+	}
 
-	if (!X509_set_serialNumber(cert, serialNumber))
-		errx(1, "X509_set_serialNumber");
+	if (!X509_set_serialNumber(cert->x509, serialNumber)) {
+		cert->errstr = "X509_set_serialNumber";
+		return 0;
+	}
 
 	BN_free(bn);
 	ASN1_INTEGER_free(serialNumber);
+
+	return 1;
 }
 
 static void
@@ -424,7 +435,8 @@ cert_from_subject_and_issuer_key(struct cert *cert, EVP_PKEY *subject_key, EVP_P
 
 	if (!cert_set_version(cert))
 		return 0;
-	cert_set_serial_number(cert->x509);
+	if (!cert_set_serial_number(cert))
+		return 0;
 	/* Signature Algorithm will be set when we sign. */
 	cert_set_issuer(cert->x509, issuer_key);
 	cert_set_subject(cert->x509, subject_key);
