@@ -327,8 +327,8 @@ cert_set_authority_key_identifier(struct cert *cert, EVP_PKEY *issuer_key)
 	return 1;
 }
 
-static void
-cert_set_key_usage(X509 *cert, enum cert_kind kind)
+static int
+cert_set_key_usage(struct cert *cert, enum cert_kind kind)
 {
 	X509_EXTENSION *ext;
 	uint32_t ku_flags;
@@ -342,11 +342,15 @@ cert_set_key_usage(X509 *cert, enum cert_kind kind)
 	else
 		ku_flags = X509v3_KU_KEY_CERT_SIGN | X509v3_KU_CRL_SIGN;
 
-	if ((ext = ext_key_usage_new(ku_flags)) == NULL)
-		errx(1, "ext_key_usage");
+	if ((ext = ext_key_usage_new(ku_flags)) == NULL) {
+		cert->errstr = "ext_key_usage";
+		return 0;
+	}
 
-	cert_add_extension(cert, ext);
+	cert_add_extension(cert->x509, ext);
 	ext = NULL;
+
+	return 1;
 }
 
 static void
@@ -465,7 +469,8 @@ cert_set_extensions(struct cert *cert, enum cert_kind kind,
 		return 0;
 	if (!cert_set_authority_key_identifier(cert, issuer_key))
 		return 0;
-	cert_set_key_usage(cert->x509, kind);
+	if (!cert_set_key_usage(cert, kind))
+		return 0;
 	cert_set_extended_key_usage(cert->x509, kind);
 	cert_set_crl_distribution_points(cert->x509, kind);
 	cert_set_authority_info_access(cert->x509, kind);
