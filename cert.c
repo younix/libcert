@@ -170,15 +170,23 @@ cert_set_issuer(struct cert *cert, EVP_PKEY *issuer_key)
 	return 1;
 }
 
-static void
-cert_set_subject(X509 *cert, EVP_PKEY *subject_key)
+static int
+cert_set_subject(struct cert *cert, EVP_PKEY *subject_key)
 {
 	X509_NAME *subject;
 
-	cert_subject_from_key(subject_key, &subject);
-	if (!X509_set_subject_name(cert, subject))
-		errx(1, "X509_set_subject_name");
+	if (!cert_subject_from_key(cert, subject_key, &subject))
+		return 0;
+
+	if (!X509_set_subject_name(cert->x509, subject)) {
+		cert->errstr = "X509_set_subject_name";
+		X509_NAME_free(subject);
+		return 0;
+	}
+
 	X509_NAME_free(subject);
+
+	return 1;
 }
 
 static int
@@ -447,7 +455,8 @@ cert_from_subject_and_issuer_key(struct cert *cert, EVP_PKEY *subject_key, EVP_P
 	/* Signature Algorithm will be set when we sign. */
 	if (!cert_set_issuer(cert, issuer_key))
 		return 0;
-	cert_set_subject(cert->x509, subject_key);
+	if (!cert_set_subject(cert, subject_key))
+		return 0;
 	cert_set_validity(cert->x509, kind);
 	cert_set_subject_public_key_info(cert->x509, subject_key);
 	cert_set_extensions(cert->x509, kind, subject_key, issuer_key);
