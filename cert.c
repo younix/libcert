@@ -443,19 +443,21 @@ cert_set_certificate_policies(X509 *cert)
 	ext = NULL;
 }
 
-static void
-cert_set_extensions(X509 *cert, enum cert_kind kind, EVP_PKEY *subject_key,
-    EVP_PKEY *issuer_key)
+static int
+cert_set_extensions(struct cert *cert, enum cert_kind kind,
+    EVP_PKEY *subject_key, EVP_PKEY *issuer_key)
 {
-	cert_set_basic_constraints(cert, kind);
-	cert_set_subject_key_identifier(cert, subject_key);
-	cert_set_authority_key_identifier(cert, issuer_key);
-	cert_set_key_usage(cert, kind);
-	cert_set_extended_key_usage(cert, kind);
-	cert_set_crl_distribution_points(cert, kind);
-	cert_set_authority_info_access(cert, kind);
-	cert_set_subject_info_access(cert, kind);
-	cert_set_certificate_policies(cert);
+	cert_set_basic_constraints(cert->x509, kind);
+	cert_set_subject_key_identifier(cert->x509, subject_key);
+	cert_set_authority_key_identifier(cert->x509, issuer_key);
+	cert_set_key_usage(cert->x509, kind);
+	cert_set_extended_key_usage(cert->x509, kind);
+	cert_set_crl_distribution_points(cert->x509, kind);
+	cert_set_authority_info_access(cert->x509, kind);
+	cert_set_subject_info_access(cert->x509, kind);
+	cert_set_certificate_policies(cert->x509);
+
+	return 1;
 }
 
 static void
@@ -486,7 +488,8 @@ cert_from_subject_and_issuer_key(struct cert *cert, EVP_PKEY *subject_key, EVP_P
 		return 0;
 	if (!cert_set_subject_public_key_info(cert, subject_key))
 		return 0;
-	cert_set_extensions(cert->x509, kind, subject_key, issuer_key);
+	if (!cert_set_extensions(cert, kind, subject_key, issuer_key))
+		return 0;
 
 	cert_sign(cert->x509, issuer_key);
 
