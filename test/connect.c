@@ -56,7 +56,10 @@ server(int s)
 	if ((cert_config = cert_config_new()) == NULL)
 		err(1, "cert_config_new");
 
-	if ((cert = cert_create(cert_config)) == NULL)
+	if ((cert = cert_new()) == NULL)
+		err(1, "cert_new");
+
+	if (cert_create(cert, cert_config) == 0)
 		err(1, "cert_create");
 
 	if (cert_key_data(cert, &key, &keylen) == 0)

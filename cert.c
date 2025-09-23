@@ -104,17 +104,6 @@ cert_subject_from_key(struct cert *cert, EVP_PKEY *pkey,
 	return cert_set_common_name(cert, pkey, out_subject);
 }
 
-int
-cert_new(struct cert *cert)
-{
-	if ((cert->x509 = X509_new()) == NULL) {
-		cert->errstr = "X509_new";
-		return 0;
-	}
-
-	return 1;
-}
-
 static int
 cert_set_version(struct cert *cert)
 {
@@ -525,9 +514,6 @@ int
 cert_from_subject_and_issuer_key(struct cert *cert, EVP_PKEY *subject_key, EVP_PKEY *issuer_key,
     enum cert_kind kind)
 {
-	if (cert_new(cert) == 0)
-		return 0;
-
 	if (!cert_set_version(cert))
 		return 0;
 	if (!cert_set_serial_number(cert))
@@ -646,6 +632,23 @@ cert_config_free(struct cert_config *config)
 	free(config);
 }
 
+struct cert *
+cert_new(void)
+{
+	struct cert *cert;
+
+	cert = malloc(sizeof *cert);
+	if (cert == NULL)
+		return NULL;
+
+	if ((cert->x509 = X509_new()) == NULL) {
+		free(cert);
+		return NULL;
+	}
+
+	return cert;
+}
+
 void
 cert_free(struct cert *cert)
 {
@@ -654,25 +657,24 @@ cert_free(struct cert *cert)
 	free(cert);
 }
 
-struct cert *
-cert_create(struct cert_config *config)
+int
+cert_create(struct cert *cert, struct cert_config *config)
 {
-	struct cert *cert;
+	if (cert == NULL)
+		return 0;
 
 	if (config == NULL)
-		return NULL;
-
-	cert = malloc(sizeof *cert);
-	if (cert == NULL)
-		return NULL;
+		return 0;
 
 	cert->config = config;
 
-	if (!cert_generate_keys(cert))
-		errx(1, "cert_generate_keys");
+	if (!cert_generate_keys(cert)) {
+		cert->errstr = "cert_generate_keys";
+		return 0;
+	}
 
 	cert_from_subject_and_issuer_key(cert, cert->key, cert->key,
 	    CERT_KIND_EE);
 
-	return cert;
+	return 1;
 }

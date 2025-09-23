@@ -34,9 +34,10 @@ struct cert {
 
 struct cert_config *
 	cert_config_new(void);
-struct cert *
-	cert_create(struct cert_config *);
+int	cert_create(struct cert *cert, struct cert_config *);
 void	cert_config_free(struct cert_config *);
+struct cert *
+	cert_new(void);
 void	cert_free(struct cert *);
 int	cert_crt_data(struct cert *, uint8_t **, size_t *);
 int	cert_key_data(struct cert *, uint8_t **, size_t *);

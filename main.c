@@ -49,7 +49,8 @@ main(int argc, char *argv[])
 	argv += optind;
 
 	config = cert_config_new();
-	cert = cert_create(config);
+	cert = cert_new();
+	cert_create(cert, config);
 	cert_config_free(config);
 
 	if (verbose)
