@@ -106,11 +106,16 @@ cert_new(struct cert *cert)
 	return 1;
 }
 
-static void
-cert_set_version(X509 *cert)
+static int
+cert_set_version(struct cert *cert)
 {
-	if (!X509_set_version(cert, X509_VERSION_3))
-		errx(1, "X509_set_version");
+	if (!X509_set_version(cert->x509, X509_VERSION_3)) {
+		cert->errstr = "X509_set_version";
+
+		return 0;
+	}
+
+	return 1;
 }
 
 static void
@@ -417,7 +422,8 @@ cert_from_subject_and_issuer_key(struct cert *cert, EVP_PKEY *subject_key, EVP_P
 	if (cert_new(cert) == 0)
 		return 0;
 
-	cert_set_version(cert->x509);
+	if (!cert_set_version(cert))
+		return 0;
 	cert_set_serial_number(cert->x509);
 	/* Signature Algorithm will be set when we sign. */
 	cert_set_issuer(cert->x509, issuer_key);
