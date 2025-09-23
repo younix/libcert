@@ -389,8 +389,8 @@ cert_set_crl_distribution_points(struct cert *cert, enum cert_kind kind)
 	return 1;
 }
 
-static void
-cert_set_authority_info_access(X509 *cert, enum cert_kind kind)
+static int
+cert_set_authority_info_access(struct cert *cert, enum cert_kind kind)
 {
 	X509_EXTENSION *ext;
 	const struct access_method am = {
@@ -400,13 +400,17 @@ cert_set_authority_info_access(X509 *cert, enum cert_kind kind)
 
 	/* In a self-signed certificate, this extension MUST be omitted. */
 	if (kind == CERT_KIND_TA)
-		return;
+		return 1;
 
-	if ((ext = ext_authority_info_access_new(&am)) == NULL)
-		errx(1, "ext_authority_info_access_new");
+	if ((ext = ext_authority_info_access_new(&am)) == NULL) {
+		cert->errstr = "ext_authority_info_access_new";
+		return 0;
+	}
 
-	cert_add_extension(cert, ext);
+	cert_add_extension(cert->x509, ext);
 	ext = NULL;
+
+	return 1;
 }
 
 static void
@@ -480,7 +484,8 @@ cert_set_extensions(struct cert *cert, enum cert_kind kind,
 		return 0;
 	if (!cert_set_crl_distribution_points(cert, kind))
 		return 0;
-	cert_set_authority_info_access(cert->x509, kind);
+	if (!cert_set_authority_info_access(cert, kind))
+		return 0;
 	cert_set_subject_info_access(cert->x509, kind);
 	cert_set_certificate_policies(cert->x509);
 
