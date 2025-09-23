@@ -260,13 +260,17 @@ cert_set_subject_public_key_info(struct cert *cert, EVP_PKEY *subject_key)
 	return 1;
 }
 
-static void
-cert_add_extension(X509 *cert, X509_EXTENSION *ext)
+static int
+cert_add_extension(struct cert *cert, X509_EXTENSION *ext)
 {
-	if (!X509_add_ext(cert, ext, -1))
-		errx(1, "X509_add_ext");
+	if (!X509_add_ext(cert->x509, ext, -1)) {
+		cert->errstr = "X509_add_ext";
+		return 0;
+	}
 
 	X509_EXTENSION_free(ext);
+
+	return 1;
 }
 
 static int
@@ -287,8 +291,8 @@ cert_set_basic_constraints(struct cert *cert, enum cert_kind kind)
 		return 0;
 	}
 
-	cert_add_extension(cert->x509, ext);
-	ext = NULL;
+	if (!cert_add_extension(cert, ext))
+		return 0;
 
 	return 1;
 }
@@ -303,8 +307,8 @@ cert_set_subject_key_identifier(struct cert *cert, EVP_PKEY *subject_key)
 		return 0;
 	}
 
-	cert_add_extension(cert->x509, ext);
-	ext = NULL;
+	if (!cert_add_extension(cert, ext))
+		return 0;
 
 	return 1;
 }
@@ -325,8 +329,8 @@ cert_set_authority_key_identifier(struct cert *cert, EVP_PKEY *issuer_key)
 		return 0;
 	}
 
-	cert_add_extension(cert->x509, ext);
-	ext = NULL;
+	if (!cert_add_extension(cert, ext))
+		return 0;
 
 	return 1;
 }
@@ -351,8 +355,8 @@ cert_set_key_usage(struct cert *cert, enum cert_kind kind)
 		return 0;
 	}
 
-	cert_add_extension(cert->x509, ext);
-	ext = NULL;
+	if (!cert_add_extension(cert, ext))
+		return 0;
 
 	return 1;
 }
@@ -387,8 +391,8 @@ cert_set_crl_distribution_points(struct cert *cert, enum cert_kind kind)
 		return 0;
 	}
 
-	cert_add_extension(cert->x509, ext);
-	ext = NULL;
+	if (!cert_add_extension(cert, ext))
+		return 0;
 
 	return 1;
 }
@@ -411,8 +415,8 @@ cert_set_authority_info_access(struct cert *cert, enum cert_kind kind)
 		return 0;
 	}
 
-	cert_add_extension(cert->x509, ext);
-	ext = NULL;
+	if (!cert_add_extension(cert, ext))
+		return 0;
 
 	return 1;
 }
@@ -457,8 +461,8 @@ cert_set_subject_info_access(struct cert *cert, enum cert_kind kind)
 		return 0;
 	}
 
-	cert_add_extension(cert->x509, ext);
-	ext = NULL;
+	if (!cert_add_extension(cert, ext))
+		return 0;
 
 	return 1;
 }
@@ -474,8 +478,8 @@ cert_set_certificate_policies(struct cert *cert)
 		return 0;
 	}
 
-	cert_add_extension(cert->x509, ext);
-	ext = NULL;
+	if (!cert_add_extension(cert, ext))
+		return 0;
 
 	return 1;
 }
