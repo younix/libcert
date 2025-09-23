@@ -353,9 +353,10 @@ cert_set_key_usage(struct cert *cert, enum cert_kind kind)
 	return 1;
 }
 
-static void
-cert_set_extended_key_usage(X509 *cert, enum cert_kind kind)
+static int
+cert_set_extended_key_usage(struct cert *cert, enum cert_kind kind)
 {
+	return 1;
 }
 
 /* XXX - make this configurable. */
@@ -471,7 +472,8 @@ cert_set_extensions(struct cert *cert, enum cert_kind kind,
 		return 0;
 	if (!cert_set_key_usage(cert, kind))
 		return 0;
-	cert_set_extended_key_usage(cert->x509, kind);
+	if (!cert_set_extended_key_usage(cert, kind))
+		return 0;
 	cert_set_crl_distribution_points(cert->x509, kind);
 	cert_set_authority_info_access(cert->x509, kind);
 	cert_set_subject_info_access(cert->x509, kind);
