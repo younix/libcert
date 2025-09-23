@@ -265,24 +265,28 @@ cert_add_extension(X509 *cert, X509_EXTENSION *ext)
 	X509_EXTENSION_free(ext);
 }
 
-static void
-cert_set_basic_constraints(X509 *cert, enum cert_kind kind)
+static int
+cert_set_basic_constraints(struct cert *cert, enum cert_kind kind)
 {
 	X509_EXTENSION *ext;
 
 	/* MUST NOT be present in end entity certs. */
 	if (kind == CERT_KIND_EE)
-		return;
+		return 1;
 
 	/*
 	 * Basic Constraints MUST be present in CA certs.
 	 * cA Boolean MUST be set, pathLen MUST NOT be present.
 	 */
-	if ((ext = ext_basic_constraints_new(1)) == NULL)
-		errx(1, "ext_data_basic_constraints_new");
+	if ((ext = ext_basic_constraints_new(1)) == NULL) {
+		cert->errstr = "ext_data_basic_constraints_new";
+		return 0;
+	}
 
-	cert_add_extension(cert, ext);
+	cert_add_extension(cert->x509, ext);
 	ext = NULL;
+
+	return 1;
 }
 
 static void
@@ -447,7 +451,8 @@ static int
 cert_set_extensions(struct cert *cert, enum cert_kind kind,
     EVP_PKEY *subject_key, EVP_PKEY *issuer_key)
 {
-	cert_set_basic_constraints(cert->x509, kind);
+	if (!cert_set_basic_constraints(cert, kind))
+		return 0;
 	cert_set_subject_key_identifier(cert->x509, subject_key);
 	cert_set_authority_key_identifier(cert->x509, issuer_key);
 	cert_set_key_usage(cert->x509, kind);
