@@ -474,7 +474,7 @@ cert_set_certificate_policies(struct cert *cert)
 
 	if ((ext = ext_certificate_policies_new(NID_ipAddr_asNumber,
 	    "https://example.com/CPS.pdf")) == NULL) {
-		errx(1, "ext_certificate_policies_new");
+		cert->errstr = "ext_certificate_policies_new";
 		return 0;
 	}
 
