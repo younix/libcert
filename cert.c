@@ -460,11 +460,15 @@ cert_set_extensions(struct cert *cert, enum cert_kind kind,
 	return 1;
 }
 
-static void
-cert_sign(X509 *cert, EVP_PKEY *issuer_key)
+static int
+cert_sign(struct cert *cert, EVP_PKEY *issuer_key)
 {
-	if (!X509_sign(cert, issuer_key, EVP_sha256()))
-		errx(1, "X509_digest");
+	if (!X509_sign(cert->x509, issuer_key, EVP_sha256())) {
+		cert->errstr = "X509_digest";
+		return 0;
+	}
+
+	return 1;
 }
 
 int
@@ -491,7 +495,8 @@ cert_from_subject_and_issuer_key(struct cert *cert, EVP_PKEY *subject_key, EVP_P
 	if (!cert_set_extensions(cert, kind, subject_key, issuer_key))
 		return 0;
 
-	cert_sign(cert->x509, issuer_key);
+	if (!cert_sign(cert, issuer_key))
+		return 0;
 
 	return 1;
 }
