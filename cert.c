@@ -214,25 +214,35 @@ cert_kind_to_days(enum cert_kind kind)
 	errx(1, "%s: unreachable", __func__);
 }
 
-static void
-cert_set_validity(X509 *cert, enum cert_kind kind)
+static int
+cert_set_validity(struct cert *cert, enum cert_kind kind)
 {
 	ASN1_TIME *notBefore, *notAfter;
 	int days = cert_kind_to_days(kind);
 	time_t now = time(NULL); /* XXX - make this a global. */
 
-	if ((notBefore = X509_time_adj_ex(NULL, 0, 0, &now)) == NULL)
-		errx(1, "X509_time_adj_ex");
-	if ((notAfter = X509_time_adj_ex(NULL, days, 0, &now)) == NULL)
-		errx(1, "X509_time_adj_ex");
+	if ((notBefore = X509_time_adj_ex(NULL, 0, 0, &now)) == NULL) {
+		cert->errstr = "X509_time_adj_ex";
+		return 0;
+	}
+	if ((notAfter = X509_time_adj_ex(NULL, days, 0, &now)) == NULL) {
+		cert->errstr = "X509_time_adj_ex";
+		return 0;
+	}
 
-	if (!X509_set1_notBefore(cert, notBefore))
-		errx(1, "X509_set1_notBefore");
-	if (!X509_set1_notAfter(cert, notAfter))
-		errx(1, "X509_set1_notAfter");
+	if (!X509_set1_notBefore(cert->x509, notBefore)) {
+		cert->errstr = "X509_set1_notBefore";
+		return 0;
+	}
+	if (!X509_set1_notAfter(cert->x509, notAfter)) {
+		cert->errstr = "X509_set1_notAfter";
+		return 0;
+	}
 
 	ASN1_TIME_free(notBefore);
 	ASN1_TIME_free(notAfter);
+
+	return 1;
 }
 
 static void
@@ -468,7 +478,8 @@ cert_from_subject_and_issuer_key(struct cert *cert, EVP_PKEY *subject_key, EVP_P
 		return 0;
 	if (!cert_set_subject(cert, subject_key))
 		return 0;
-	cert_set_validity(cert->x509, kind);
+	if (!cert_set_validity(cert, kind))
+		return 0;
 	cert_set_subject_public_key_info(cert->x509, subject_key);
 	cert_set_extensions(cert->x509, kind, subject_key, issuer_key);
 
