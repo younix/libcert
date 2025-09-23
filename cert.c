@@ -459,17 +459,21 @@ cert_set_subject_info_access(struct cert *cert, enum cert_kind kind)
 	return 1;
 }
 
-static void
-cert_set_certificate_policies(X509 *cert)
+static int
+cert_set_certificate_policies(struct cert *cert)
 {
 	X509_EXTENSION *ext;
 
 	if ((ext = ext_certificate_policies_new(NID_ipAddr_asNumber,
-	    "https://example.com/CPS.pdf")) == NULL)
+	    "https://example.com/CPS.pdf")) == NULL) {
 		errx(1, "ext_certificate_policies_new");
+		return 0;
+	}
 
-	cert_add_extension(cert, ext);
+	cert_add_extension(cert->x509, ext);
 	ext = NULL;
+
+	return 1;
 }
 
 static int
@@ -492,7 +496,8 @@ cert_set_extensions(struct cert *cert, enum cert_kind kind,
 		return 0;
 	if (!cert_set_subject_info_access(cert, kind))
 		return 0;
-	cert_set_certificate_policies(cert->x509);
+	if (!cert_set_certificate_policies(cert))
+		return 0;
 
 	return 1;
 }
