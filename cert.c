@@ -289,16 +289,20 @@ cert_set_basic_constraints(struct cert *cert, enum cert_kind kind)
 	return 1;
 }
 
-static void
-cert_set_subject_key_identifier(X509 *cert, EVP_PKEY *subject_key)
+static int
+cert_set_subject_key_identifier(struct cert *cert, EVP_PKEY *subject_key)
 {
 	X509_EXTENSION *ext;
 
-	if ((ext = ext_subject_key_identifier_new(subject_key)) == NULL)
-		errx(1, "ext_subject_key_identifier_new");
+	if ((ext = ext_subject_key_identifier_new(subject_key)) == NULL) {
+		cert->errstr = "ext_subject_key_identifier_new";
+		return 0;
+	}
 
-	cert_add_extension(cert, ext);
+	cert_add_extension(cert->x509, ext);
 	ext = NULL;
+
+	return 1;
 }
 
 static void
@@ -453,7 +457,8 @@ cert_set_extensions(struct cert *cert, enum cert_kind kind,
 {
 	if (!cert_set_basic_constraints(cert, kind))
 		return 0;
-	cert_set_subject_key_identifier(cert->x509, subject_key);
+	if (!cert_set_subject_key_identifier(cert, subject_key))
+		return 0;
 	cert_set_authority_key_identifier(cert->x509, issuer_key);
 	cert_set_key_usage(cert->x509, kind);
 	cert_set_extended_key_usage(cert->x509, kind);
