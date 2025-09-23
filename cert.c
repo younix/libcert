@@ -360,8 +360,8 @@ cert_set_extended_key_usage(struct cert *cert, enum cert_kind kind)
 }
 
 /* XXX - make this configurable. */
-static void
-cert_set_crl_distribution_points(X509 *cert, enum cert_kind kind)
+static int
+cert_set_crl_distribution_points(struct cert *cert, enum cert_kind kind)
 {
 	X509_EXTENSION *ext;
 	const char *uris[] = {
@@ -371,18 +371,22 @@ cert_set_crl_distribution_points(X509 *cert, enum cert_kind kind)
 
 	/* In a self-signed certificate, this extension MUST be omitted. */
 	if (kind == CERT_KIND_TA)
-		return;
+		return 1;
 
 	/*
 	 * Contains a single rsync:// URI in the distributionPoint's fullName
 	 * field. No CRLIssuer, no Reasons, no nameRelativeToCRLIssuer.
 	 */
 
-	if ((ext = ext_crl_distribution_points_new(uris, 2)) == NULL)
-		errx(1, "ext_crl_distribution_points_new");
+	if ((ext = ext_crl_distribution_points_new(uris, 2)) == NULL) {
+		cert->errstr = "ext_crl_distribution_points_new";
+		return 0;
+	}
 
-	cert_add_extension(cert, ext);
+	cert_add_extension(cert->x509, ext);
 	ext = NULL;
+
+	return 1;
 }
 
 static void
@@ -474,7 +478,8 @@ cert_set_extensions(struct cert *cert, enum cert_kind kind,
 		return 0;
 	if (!cert_set_extended_key_usage(cert, kind))
 		return 0;
-	cert_set_crl_distribution_points(cert->x509, kind);
+	if (!cert_set_crl_distribution_points(cert, kind))
+		return 0;
 	cert_set_authority_info_access(cert->x509, kind);
 	cert_set_subject_info_access(cert->x509, kind);
 	cert_set_certificate_policies(cert->x509);
