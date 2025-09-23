@@ -211,7 +211,8 @@ cert_kind_to_days(enum cert_kind kind)
 	case CERT_KIND_TA:
 		return 5 * 365;
 	}
-	errx(1, "%s: unreachable", __func__);
+
+	return -1;
 }
 
 static int
@@ -220,6 +221,9 @@ cert_set_validity(struct cert *cert, enum cert_kind kind)
 	ASN1_TIME *notBefore, *notAfter;
 	int days = cert_kind_to_days(kind);
 	time_t now = time(NULL); /* XXX - make this a global. */
+
+	if (days == -1)
+		cert->errstr = "no default days";
 
 	if ((notBefore = X509_time_adj_ex(NULL, 0, 0, &now)) == NULL) {
 		cert->errstr = "X509_time_adj_ex";
