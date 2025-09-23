@@ -305,8 +305,8 @@ cert_set_subject_key_identifier(struct cert *cert, EVP_PKEY *subject_key)
 	return 1;
 }
 
-static void
-cert_set_authority_key_identifier(X509 *cert, EVP_PKEY *issuer_key)
+static int
+cert_set_authority_key_identifier(struct cert *cert, EVP_PKEY *issuer_key)
 {
 	X509_EXTENSION *ext;
 
@@ -316,11 +316,15 @@ cert_set_authority_key_identifier(X509 *cert, EVP_PKEY *issuer_key)
 	 * Key Identifier MUST be present; MUST omit authorityCertIssuer and
 	 * authorityCertSerialNumber.
 	 */
-	if ((ext = ext_authority_key_identifier_new(issuer_key)) == NULL)
-		errx(1, "ext_authority_key_identifier_new");
+	if ((ext = ext_authority_key_identifier_new(issuer_key)) == NULL) {
+		cert->errstr = "ext_authority_key_identifier_new";
+		return 0;
+	}
 
-	cert_add_extension(cert, ext);
+	cert_add_extension(cert->x509, ext);
 	ext = NULL;
+
+	return 1;
 }
 
 static void
@@ -459,7 +463,8 @@ cert_set_extensions(struct cert *cert, enum cert_kind kind,
 		return 0;
 	if (!cert_set_subject_key_identifier(cert, subject_key))
 		return 0;
-	cert_set_authority_key_identifier(cert->x509, issuer_key);
+	if (!cert_set_authority_key_identifier(cert, issuer_key))
+		return 0;
 	cert_set_key_usage(cert->x509, kind);
 	cert_set_extended_key_usage(cert->x509, kind);
 	cert_set_crl_distribution_points(cert->x509, kind);
