@@ -195,8 +195,8 @@ static const struct {
 	},
 };
 
-static void
-compat_load_nids(void)
+static int
+compat_load_nids(struct cert *cert)
 {
 	size_t i;
 
@@ -205,18 +205,24 @@ compat_load_nids(void)
 			continue;
 
 		*nids[i].NID = OBJ_create(nids[i].oid, nids[i].sn, nids[i].ln);
-		if (*nids[i].NID == NID_undef)
-			errx(1, "OBJ_create(%s)", nids[i].sn);
+		if (*nids[i].NID == NID_undef) {
+			cert->errstr = "OBJ_create";	/* XXX: nids[i].sn */
+			return 0;
+		}
 
 		if (nids[i].SN != NULL)
 			*nids[i].SN = nids[i].sn;
 		if (nids[i].LN != NULL)
 			*nids[i].LN = nids[i].ln;
 		if (nids[i].oid != NULL) {
-			if ((*nids[i].obj = OBJ_nid2obj(*nids[i].NID)) == NULL)
-				errx(1, "OBJ_nid2obj");
+			if ((*nids[i].obj = OBJ_nid2obj(*nids[i].NID)) == NULL){
+				cert->errstr = "OBJ_nid2obj";
+				return 0;
+			}
 		}
 	}
+
+	return 1;
 }
 
 int
@@ -227,7 +233,5 @@ compat_init(struct cert *cert)
 		return 0;
 	}
 
-	compat_load_nids();
-
-	return 1;
+	return compat_load_nids(cert);
 }
