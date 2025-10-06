@@ -153,17 +153,17 @@ keypair_generate(struct cert *cert)
 }
 
 EVP_PKEY *
-keypair_extract_public(EVP_PKEY *pkey)
+keypair_extract_public(struct cert *cert)
 {
 	X509_PUBKEY *x509_pubkey = NULL;
 	EVP_PKEY *pubkey = NULL, *ret = NULL;
 
-	if (!X509_PUBKEY_set(&x509_pubkey, pkey)) {
-		warnx("X509_PUBKEY_set");
+	if (!X509_PUBKEY_set(&x509_pubkey, cert->key)) {
+		cert->errstr = "X509_PUBKEY_set";
 		goto err;
 	}
 	if ((pubkey = X509_PUBKEY_get(x509_pubkey)) == NULL) {
-		warnx("X509_PUBKEY_get");
+		cert->errstr = "X509_PUBKEY_get";
 		goto err;
 	}
 

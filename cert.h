@@ -101,6 +101,6 @@ int	cert_crt_data(struct cert *, uint8_t **, size_t *);
 int	cert_key_data(struct cert *, uint8_t **, size_t *);
 
 EVP_PKEY *keypair_generate(struct cert *);
-EVP_PKEY *keypair_extract_public(EVP_PKEY *);
+EVP_PKEY *keypair_extract_public(struct cert *);
 
 #endif
