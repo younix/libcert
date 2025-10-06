@@ -79,7 +79,8 @@ int X509v3_cache_extensions(X509 *cert);
  * Provide missing obj_mac.h entries. This calls OBJ_create(3) under the hood.
  * XXX: This would be a bit less offensive if we only added a NID...
  */
-void compat_init(void);
+struct cert;
+int compat_init(struct cert *);
 
 #ifndef NID_id_ct_xml
 extern int NID_id_ct_xml;

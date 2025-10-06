@@ -219,10 +219,15 @@ compat_load_nids(void)
 	}
 }
 
-void
-compat_init(void)
+int
+compat_init(struct cert *cert)
 {
-	if (!OPENSSL_init_crypto(OPENSSL_INIT_NO_LOAD_CONFIG, NULL))
-		errx(1, "OPENSSL_init_crypto");
+	if (!OPENSSL_init_crypto(OPENSSL_INIT_NO_LOAD_CONFIG, NULL)) {
+		cert->errstr = "OPENSSL_init_crypto";
+		return 0;
+	}
+
 	compat_load_nids();
+
+	return 1;
 }
