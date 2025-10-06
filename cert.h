@@ -73,9 +73,9 @@ enum keypair {
 };
 
 enum cert_kind {
-	CERT_KIND_EE,
-	CERT_KIND_CA,
-	CERT_KIND_TA,
+	CERT_KIND_EE,	/* End Entity */
+	CERT_KIND_CA,	/* Certificate Authority */
+	CERT_KIND_TA,	/* Trust Anchor */
 };
 
 struct cert_config {
