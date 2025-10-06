@@ -34,14 +34,14 @@
 #define RSA_EXPONENT	65537	/* RSA_F4 */
 
 static EVP_PKEY *
-keypair_generate_rsa(void)
+keypair_generate_rsa(struct cert *cert)
 {
 	EVP_PKEY_CTX *ctx = NULL;
 	EVP_PKEY *pkey = NULL, *ret = NULL;
 	BIGNUM *exponent = NULL;
 
 	if ((ctx = EVP_PKEY_CTX_new_id(EVP_PKEY_RSA, NULL)) == NULL) {
-		warnx("EVP_PKEY_CTX_new_id(rsa)");
+		cert->errstr = "EVP_PKEY_CTX_new_id(rsa)";
 		goto err;
 	}
 
@@ -51,30 +51,30 @@ keypair_generate_rsa(void)
 
 	/* For unclear reasons we need to kick off the keygen state machine. */
 	if (EVP_PKEY_keygen_init(ctx) <= 0) {
-		warnx("EVP_PKEY_keygen_init(rsa)");
+		cert->errstr = "EVP_PKEY_keygen_init(rsa)";
 		goto err;
 	}
 
 	if (EVP_PKEY_CTX_set_rsa_keygen_bits(ctx, RSA_KEY_SIZE) <= 0) {
-		warnx("EVP_PKEY_CTX_set_rsa_keygen_bits");
+		cert->errstr= "EVP_PKEY_CTX_set_rsa_keygen_bits";
 		goto err;
 	}
 	/* 65537 is the default public exponent, but let's make sure. */
 	if ((exponent = BN_new()) == NULL) {
-		warnx("BN_new(rsa exp)");
+		cert->errstr = "BN_new(rsa exp)";
 		goto err;
 	}
 	if (!BN_set_word(exponent, RSA_EXPONENT)) {
-		warnx("BN_set_word(rsa exp)");
+		cert->errstr = "BN_set_word(rsa exp)";
 		goto err;
 	}
 	if (EVP_PKEY_CTX_set1_rsa_keygen_pubexp(ctx, exponent) <= 0) {
-		warnx("EVP_PKEY_CTX_set1_rsa_keygen_bits");
+		cert->errstr = "EVP_PKEY_CTX_set1_rsa_keygen_bits";
 		goto err;
 	}
 
 	if (EVP_PKEY_keygen(ctx, &pkey) <= 0) {
-		warnx("EVP_PKEY_keygen(rsa)");
+		cert->errstr = "EVP_PKEY_keygen(rsa)";
 		goto err;
 	}
 
@@ -142,7 +142,7 @@ keypair_generate(struct cert *cert)
 {
 	switch (cert->config->keytype) {
 	case KEYPAIR_RSA:
-		return keypair_generate_rsa();
+		return keypair_generate_rsa(cert);
 	case KEYPAIR_ECDSA:
 		return keypair_generate_ecdsa();
 	}
