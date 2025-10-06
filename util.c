@@ -23,7 +23,6 @@
 
 #include "bytestring/bytestring.h"
 #include "constant_time.h"
-#include "extern.h"
 
 /*
  * Compute key identifier: take the SHA-1 of the bit string of the public key,

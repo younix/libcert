@@ -15,7 +15,7 @@
  */
 
 /*
- * IWYU pragma: private, include "extern.h"
+ * IWYU pragma: private
  */
 
 #ifndef __OPENSSL_COMPAT_H__
@@ -28,6 +28,8 @@
 #include <openssl/rsa.h>	/* IWYU pragma: keep */
 #include <openssl/x509.h>	/* IWYU pragma: keep */
 #include <openssl/x509v3.h>	/* IWYU pragma: keep */
+
+#include "cert.h"
 
 /* X.690, 8.2.2 */
 #ifndef ASN1_BOOLEAN_FALSE

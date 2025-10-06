@@ -31,7 +31,6 @@
 #include <openssl/x509.h>
 #include <openssl/x509v3.h>
 
-#include "extern.h"
 #include "cert.h"
 
 /*

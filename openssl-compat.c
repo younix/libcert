@@ -23,7 +23,7 @@
 #include <openssl/rsa.h>
 #include <openssl/x509v3.h>
 
-#include "openssl-compat.h"
+#include "cert.h"
 
 /*
  * EVP_PKEY_CTX_set1_rsa_keygen_pubexp() is the OpenSSL 3 replacement API

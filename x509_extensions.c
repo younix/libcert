@@ -24,7 +24,7 @@
 #include <openssl/x509.h>
 #include <openssl/x509v3.h>
 
-#include "extern.h"
+#include "cert.h"
 
 /*
  * RFC 5280, section 4.2.1.9
