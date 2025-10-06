@@ -90,40 +90,40 @@ keypair_generate_rsa(struct cert *cert)
 }
 
 static EVP_PKEY *
-keypair_generate_ecdsa(void)
+keypair_generate_ecdsa(struct cert *cert)
 {
 	EVP_PKEY_CTX *ctx = NULL;
 	EVP_PKEY *pkey = NULL, *ret = NULL;
 	int nid;
 
 	if ((ctx = EVP_PKEY_CTX_new_id(EVP_PKEY_EC, NULL)) == NULL) {
-		warnx("EVP_PKEY_CTX_new_id(P-256)");
+		cert->errstr = "EVP_PKEY_CTX_new_id(P-256)";
 		goto err;
 	}
 
 	/* For unclear reasons we need to kick off the keygen state machine. */
 	if (EVP_PKEY_keygen_init(ctx) <= 0) {
-		warnx("EVP_PKEY_keygen_init(P-256)");
+		cert->errstr = "EVP_PKEY_keygen_init(P-256)";
 		goto err;
 	}
 
 	/* NID_X9_62_prime256v1 is a stupid name. */
 	if ((nid = EC_curve_nist2nid("P-256")) == NID_undef) {
-		warnx("EC_curve_nist2nid");
+		cert->errstr = "EC_curve_nist2nid";
 		goto err;
 	}
 	if (EVP_PKEY_CTX_set_ec_paramgen_curve_nid(ctx, nid) <= 0) {
-		warnx("EVP_PKEY_CTX_set_ec_paramgen_curve_nid()");
+		cert->errstr = "EVP_PKEY_CTX_set_ec_paramgen_curve_nid()";
 		goto err;
 	}
 	/* Ensure we use parameter encoding via "curve name" (OID). */
 	if (EVP_PKEY_CTX_set_ec_param_enc(ctx, OPENSSL_EC_NAMED_CURVE) <= 0) {
-		warnx("EVP_PKEY_CTX_set_ec_param_enc");
+		cert->errstr = "EVP_PKEY_CTX_set_ec_param_enc";
 		goto err;
 	}
 
 	if (EVP_PKEY_keygen(ctx, &pkey) <= 0) {
-		warnx("EVP_PKEY_keygen(P-256)");
+		cert->errstr = "EVP_PKEY_keygen(P-256)";
 		goto err;
 	}
 
@@ -144,7 +144,7 @@ keypair_generate(struct cert *cert)
 	case KEYPAIR_RSA:
 		return keypair_generate_rsa(cert);
 	case KEYPAIR_ECDSA:
-		return keypair_generate_ecdsa();
+		return keypair_generate_ecdsa(cert);
 	}
 
 	cert->errstr = "keypair_generate: unreachable";
