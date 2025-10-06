@@ -138,15 +138,18 @@ keypair_generate_ecdsa(void)
 }
 
 EVP_PKEY *
-keypair_generate(enum keypair kind)
+keypair_generate(struct cert *cert)
 {
-	switch (kind) {
+	switch (cert->config->keytype) {
 	case KEYPAIR_RSA:
 		return keypair_generate_rsa();
 	case KEYPAIR_ECDSA:
 		return keypair_generate_ecdsa();
 	}
-	errx(1, "%s: unreachable", __func__);
+
+	cert->errstr = "keypair_generate: unreachable";
+
+	return NULL;
 }
 
 EVP_PKEY *

@@ -72,9 +72,6 @@ enum keypair {
 	KEYPAIR_ECDSA,
 };
 
-EVP_PKEY *keypair_generate(enum keypair);
-EVP_PKEY *keypair_extract_public(EVP_PKEY *);
-
 enum cert_kind {
 	CERT_KIND_EE,
 	CERT_KIND_CA,
@@ -102,5 +99,8 @@ struct cert *
 void	cert_free(struct cert *);
 int	cert_crt_data(struct cert *, uint8_t **, size_t *);
 int	cert_key_data(struct cert *, uint8_t **, size_t *);
+
+EVP_PKEY *keypair_generate(struct cert *);
+EVP_PKEY *keypair_extract_public(EVP_PKEY *);
 
 #endif

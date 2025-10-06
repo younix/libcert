@@ -52,10 +52,8 @@
 static int
 cert_generate_keys(struct cert *cert)
 {
-	if ((cert->key = keypair_generate(cert->config->keytype)) == NULL) {
-		cert->errstr = "keypair_generate";
+	if ((cert->key = keypair_generate(cert)) == NULL)
 		return 0;
-	}
 
 	return 1;
 }
@@ -667,10 +665,8 @@ cert_create(struct cert *cert, struct cert_config *config)
 
 	cert->config = config;
 
-	if (!cert_generate_keys(cert)) {
-		cert->errstr = "cert_generate_keys";
+	if (!cert_generate_keys(cert))
 		return 0;
-	}
 
 	cert_from_subject_and_issuer_key(cert, cert->key, cert->key,
 	    CERT_KIND_EE);
