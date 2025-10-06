@@ -202,10 +202,10 @@ cert_kind_to_days(enum cert_kind kind)
 }
 
 static int
-cert_set_validity(struct cert *cert, enum cert_kind kind)
+cert_set_validity(struct cert *cert)
 {
 	ASN1_TIME *notBefore, *notAfter;
-	int days = cert_kind_to_days(kind);
+	int days = cert_kind_to_days(cert->config->kind);
 	time_t now = time(NULL); /* XXX - make this a global. */
 
 	if (days == -1)
@@ -260,12 +260,12 @@ cert_add_extension(struct cert *cert, X509_EXTENSION *ext)
 }
 
 static int
-cert_set_basic_constraints(struct cert *cert, enum cert_kind kind)
+cert_set_basic_constraints(struct cert *cert)
 {
 	X509_EXTENSION *ext;
 
 	/* MUST NOT be present in end entity certs. */
-	if (kind == CERT_KIND_EE)
+	if (cert->config->kind == CERT_KIND_EE)
 		return 1;
 
 	/*
@@ -322,7 +322,7 @@ cert_set_authority_key_identifier(struct cert *cert, EVP_PKEY *issuer_key)
 }
 
 static int
-cert_set_key_usage(struct cert *cert, enum cert_kind kind)
+cert_set_key_usage(struct cert *cert)
 {
 	X509_EXTENSION *ext;
 	uint32_t ku_flags;
@@ -331,7 +331,7 @@ cert_set_key_usage(struct cert *cert, enum cert_kind kind)
 	 * EE certs, exactly digitalSignature is set to true.
 	 * CA certs, exactly keyCertSign and cRLSign are set to true.
 	 */
-	if (kind == CERT_KIND_EE)
+	if (cert->config->kind == CERT_KIND_EE)
 		ku_flags = X509v3_KU_DIGITAL_SIGNATURE;
 	else
 		ku_flags = X509v3_KU_KEY_CERT_SIGN | X509v3_KU_CRL_SIGN;
@@ -348,14 +348,14 @@ cert_set_key_usage(struct cert *cert, enum cert_kind kind)
 }
 
 static int
-cert_set_extended_key_usage(struct cert *cert, enum cert_kind kind)
+cert_set_extended_key_usage(struct cert *cert)
 {
 	return 1;
 }
 
 /* XXX - make this configurable. */
 static int
-cert_set_crl_distribution_points(struct cert *cert, enum cert_kind kind)
+cert_set_crl_distribution_points(struct cert *cert)
 {
 	X509_EXTENSION *ext;
 	const char *uris[] = {
@@ -364,7 +364,7 @@ cert_set_crl_distribution_points(struct cert *cert, enum cert_kind kind)
 	};
 
 	/* In a self-signed certificate, this extension MUST be omitted. */
-	if (kind == CERT_KIND_TA)
+	if (cert->config->kind == CERT_KIND_TA)
 		return 1;
 
 	/*
@@ -384,7 +384,7 @@ cert_set_crl_distribution_points(struct cert *cert, enum cert_kind kind)
 }
 
 static int
-cert_set_authority_info_access(struct cert *cert, enum cert_kind kind)
+cert_set_authority_info_access(struct cert *cert)
 {
 	X509_EXTENSION *ext;
 	const struct access_method am = {
@@ -393,7 +393,7 @@ cert_set_authority_info_access(struct cert *cert, enum cert_kind kind)
 	};
 
 	/* In a self-signed certificate, this extension MUST be omitted. */
-	if (kind == CERT_KIND_TA)
+	if (cert->config->kind == CERT_KIND_TA)
 		return 1;
 
 	if ((ext = ext_authority_info_access_new(&am)) == NULL) {
@@ -408,13 +408,13 @@ cert_set_authority_info_access(struct cert *cert, enum cert_kind kind)
 }
 
 static int
-cert_set_subject_info_access(struct cert *cert, enum cert_kind kind)
+cert_set_subject_info_access(struct cert *cert)
 {
 	X509_EXTENSION *ext;
 	const struct access_method *ams;
 	size_t nams;
 
-	if (kind == CERT_KIND_EE) {
+	if (cert->config->kind == CERT_KIND_EE) {
 		static const struct access_method ee_am = {
 			.nid = NID_signedObject,
 			.uri = "rsync://foo.myca.net/ca",
@@ -471,24 +471,24 @@ cert_set_certificate_policies(struct cert *cert)
 }
 
 static int
-cert_set_extensions(struct cert *cert, enum cert_kind kind,
-    EVP_PKEY *subject_key, EVP_PKEY *issuer_key)
+cert_set_extensions(struct cert *cert, EVP_PKEY *subject_key,
+    EVP_PKEY *issuer_key)
 {
-	if (!cert_set_basic_constraints(cert, kind))
+	if (!cert_set_basic_constraints(cert))
 		return 0;
 	if (!cert_set_subject_key_identifier(cert, subject_key))
 		return 0;
 	if (!cert_set_authority_key_identifier(cert, issuer_key))
 		return 0;
-	if (!cert_set_key_usage(cert, kind))
+	if (!cert_set_key_usage(cert))
 		return 0;
-	if (!cert_set_extended_key_usage(cert, kind))
+	if (!cert_set_extended_key_usage(cert))
 		return 0;
-	if (!cert_set_crl_distribution_points(cert, kind))
+	if (!cert_set_crl_distribution_points(cert))
 		return 0;
-	if (!cert_set_authority_info_access(cert, kind))
+	if (!cert_set_authority_info_access(cert))
 		return 0;
-	if (!cert_set_subject_info_access(cert, kind))
+	if (!cert_set_subject_info_access(cert))
 		return 0;
 	if (!cert_set_certificate_policies(cert))
 		return 0;
@@ -508,8 +508,8 @@ cert_sign(struct cert *cert, EVP_PKEY *issuer_key)
 }
 
 int
-cert_from_subject_and_issuer_key(struct cert *cert, EVP_PKEY *subject_key, EVP_PKEY *issuer_key,
-    enum cert_kind kind)
+cert_from_subject_and_issuer_key(struct cert *cert, EVP_PKEY *subject_key,
+    EVP_PKEY *issuer_key)
 {
 	if (!cert_set_version(cert))
 		return 0;
@@ -521,11 +521,11 @@ cert_from_subject_and_issuer_key(struct cert *cert, EVP_PKEY *subject_key, EVP_P
 		return 0;
 	if (!cert_set_subject(cert, subject_key))
 		return 0;
-	if (!cert_set_validity(cert, kind))
+	if (!cert_set_validity(cert))
 		return 0;
 	if (!cert_set_subject_public_key_info(cert, subject_key))
 		return 0;
-	if (!cert_set_extensions(cert, kind, subject_key, issuer_key))
+	if (!cert_set_extensions(cert, subject_key, issuer_key))
 		return 0;
 
 	if (!cert_sign(cert, issuer_key))
@@ -619,6 +619,7 @@ cert_config_new(void)
 		return NULL;
 
 	config->keytype = KEYPAIR_RSA;
+	config->kind = CERT_KIND_EE;
 
 	return config;
 }
@@ -668,8 +669,7 @@ cert_create(struct cert *cert, struct cert_config *config)
 	if (!cert_generate_keys(cert))
 		return 0;
 
-	cert_from_subject_and_issuer_key(cert, cert->key, cert->key,
-	    CERT_KIND_EE);
+	cert_from_subject_and_issuer_key(cert, cert->key, cert->key);
 
 	return 1;
 }

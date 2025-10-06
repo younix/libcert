@@ -80,6 +80,7 @@ enum cert_kind {
 
 struct cert_config {
 	enum keypair	keytype;
+	enum cert_kind	kind;
 };
 
 struct cert {
