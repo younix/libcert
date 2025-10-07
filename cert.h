@@ -81,6 +81,7 @@ enum cert_kind {
 struct cert_config {
 	enum keypair	keytype;
 	enum cert_kind	kind;
+	uint64_t	serial;
 };
 
 struct cert {
@@ -95,6 +96,7 @@ struct cert_config *
 	cert_config_new(void);
 int	cert_create(struct cert *cert, struct cert_config *);
 void	cert_config_free(struct cert_config *);
+void	cert_config_serial(struct cert_config *, uint64_t);
 struct cert *
 	cert_new(void);
 void	cert_free(struct cert *);

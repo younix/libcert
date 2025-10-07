@@ -114,18 +114,18 @@ cert_set_version(struct cert *cert)
 }
 
 static int
-cert_set_serial_number(struct cert *cert)
+cert_set_serial_number_rand(struct cert *cert)
 {
 	BIGNUM *bn;
 	ASN1_INTEGER *serialNumber;
 
-	/* XXX - choose a random number in [1..2^159 - 1] for now. */
 	if ((bn = BN_new()) == NULL) {
 		cert->errstr = "BN_new";
 		return 0;
 	}
 
 	do {
+		/* Choose a random number in [1..2^159 - 1] by default. */
 		if (!BN_rand(bn, 159, BN_RAND_TOP_ANY, BN_RAND_BOTTOM_ANY)) {
 			cert->errstr = "BN_rand";
 			return 0;
@@ -146,6 +146,36 @@ cert_set_serial_number(struct cert *cert)
 	ASN1_INTEGER_free(serialNumber);
 
 	return 1;
+}
+
+static int
+cert_set_serial_number(struct cert *cert)
+{
+	ASN1_INTEGER *serialNumber;
+	int ret = 0;
+
+	if (cert->config->serial == 0)
+		return cert_set_serial_number_rand(cert);
+
+	if ((serialNumber = ASN1_INTEGER_new()) == NULL) {
+		cert->errstr = "ASN1_INTEGER_set_uint64";
+		return 0;
+	}
+
+	if (!ASN1_INTEGER_set_uint64(serialNumber, cert->config->serial)) {
+		cert->errstr = "ASN1_INTEGER_set_uint64";
+		goto out;
+	}
+
+	if (!X509_set_serialNumber(cert->x509, serialNumber)) {
+		cert->errstr = "X509_set_serialNumber";
+		goto out;
+	}
+
+	ret = 1;
+ out:
+	ASN1_INTEGER_free(serialNumber);
+	return ret;
 }
 
 static int
@@ -628,6 +658,12 @@ void
 cert_config_free(struct cert_config *config)
 {
 	free(config);
+}
+
+void
+cert_config_serial(struct cert_config *config, uint64_t serial)
+{
+	config->serial = serial;
 }
 
 struct cert *
