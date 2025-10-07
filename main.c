@@ -25,7 +25,7 @@
 void
 usage(void)
 {
-	fputs("cert [-vh] [-s serial] [file]\n", stderr);
+	fputs("cert [-vh] [-a time] [-b time] [-s serial] [file]\n", stderr);
 	exit(1);
 }
 
@@ -35,12 +35,24 @@ main(int argc, char *argv[])
 	struct cert_config	*config;
 	struct cert		*cert;
 	const char		*errstr = NULL;
-	int64_t		 	 serial = 0;
+	int64_t		 	 serial = 1;
+	time_t			 notBefore = 0;
+	time_t			 notAfter = 0;
 	int			 verbose = 0;
 	int			 ch;
 
-	while ((ch = getopt(argc, argv, "vs:h")) != -1) {
+	while ((ch = getopt(argc, argv, "a:b:vs:h")) != -1) {
 		switch (ch) {
+		case 'a':
+			notAfter = strtonum(optarg, 0, INT64_MAX, &errstr);
+			if (errstr)
+				errx(1, "strtonum: %s: %s", optarg, errstr);
+			break;
+		case 'b':
+			notBefore = strtonum(optarg, 0, INT64_MAX, &errstr);
+			if (errstr)
+				errx(1, "strtonum: %s: %s", optarg, errstr);
+			break;
 		case 'v':
 			verbose = 1;
 			break;
@@ -61,6 +73,8 @@ main(int argc, char *argv[])
 		err(1, "cert_config_new");
 
 	cert_config_serial(config, serial);
+	cert_config_notBefore(config, notBefore);
+	cert_config_notAfter(config, notAfter);
 
 	if ((cert = cert_new()) == NULL)
 		err(1, "cert_new");

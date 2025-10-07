@@ -235,17 +235,27 @@ static int
 cert_set_validity(struct cert *cert)
 {
 	ASN1_TIME *notBefore, *notAfter;
-	int days = cert_kind_to_days(cert->config->kind);
-	time_t now = time(NULL); /* XXX - make this a global. */
+	int days = 0;
 
-	if (days == -1)
-		cert->errstr = "no default days";
+	if (cert->config->notBefore == 0)
+		cert->config->notBefore = time(NULL);
 
-	if ((notBefore = X509_time_adj_ex(NULL, 0, 0, &now)) == NULL) {
+	if (cert->config->notAfter == 0) {
+		cert->config->notAfter = cert->config->notBefore;
+		days = cert_kind_to_days(cert->config->kind);
+		if (days == -1) {
+			cert->errstr = "no default days";
+			return 0;
+		}
+	}
+
+	notBefore = X509_time_adj_ex(NULL, 0, 0, &cert->config->notBefore);
+	if (notBefore == NULL) {
 		cert->errstr = "X509_time_adj_ex";
 		return 0;
 	}
-	if ((notAfter = X509_time_adj_ex(NULL, days, 0, &now)) == NULL) {
+	notAfter = X509_time_adj_ex(NULL, days, 0, &cert->config->notAfter);
+	if (notAfter == NULL) {
 		cert->errstr = "X509_time_adj_ex";
 		return 0;
 	}
@@ -648,6 +658,8 @@ cert_config_new(void)
 	if (config == NULL)
 		return NULL;
 
+	memset(config, 0, sizeof *config);
+
 	config->keytype = KEYPAIR_RSA;
 	config->kind = CERT_KIND_EE;
 
@@ -658,6 +670,18 @@ void
 cert_config_free(struct cert_config *config)
 {
 	free(config);
+}
+
+void
+cert_config_notBefore(struct cert_config *config, time_t notBefore)
+{
+	config->notBefore = notBefore;
+}
+
+void
+cert_config_notAfter(struct cert_config *config, time_t notAfter)
+{
+	config->notAfter = notAfter;
 }
 
 void

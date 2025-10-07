@@ -82,6 +82,8 @@ struct cert_config {
 	enum keypair	keytype;
 	enum cert_kind	kind;
 	uint64_t	serial;
+	time_t		notBefore;
+	time_t		notAfter;
 };
 
 struct cert {
@@ -94,11 +96,14 @@ struct cert {
 
 struct cert_config *
 	cert_config_new(void);
-int	cert_create(struct cert *cert, struct cert_config *);
 void	cert_config_free(struct cert_config *);
 void	cert_config_serial(struct cert_config *, uint64_t);
+void	cert_config_notBefore(struct cert_config *, time_t);
+void	cert_config_notAfter(struct cert_config *, time_t);
+
 struct cert *
 	cert_new(void);
+int	cert_create(struct cert *cert, struct cert_config *);
 void	cert_free(struct cert *);
 int	cert_crt_data(struct cert *, uint8_t **, size_t *);
 int	cert_key_data(struct cert *, uint8_t **, size_t *);
