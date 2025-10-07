@@ -57,9 +57,14 @@ main(int argc, char *argv[])
 	argc -= optind;
 	argv += optind;
 
-	config = cert_config_new();
+	if ((config = cert_config_new()) == NULL)
+		err(1, "cert_config_new");
+
 	cert_config_serial(config, serial);
-	cert = cert_new();
+
+	if ((cert = cert_new()) == NULL)
+		err(1, "cert_new");
+
 	cert_create(cert, config);
 	cert_config_free(config);
 
