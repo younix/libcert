@@ -15,7 +15,9 @@
  */
 
 #include <err.h>
+#include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <unistd.h>
 
 #include "cert.h"
@@ -23,7 +25,7 @@
 void
 usage(void)
 {
-	fputs("cert [-vh] [file]\n", stderr);
+	fputs("cert [-vh] [-s serial] [file]\n", stderr);
 	exit(1);
 }
 
@@ -32,13 +34,20 @@ main(int argc, char *argv[])
 {
 	struct cert_config	*config;
 	struct cert		*cert;
-	int			 ch;
+	const char		*errstr = NULL;
+	int64_t		 	 serial = 0;
 	int			 verbose = 0;
+	int			 ch;
 
-	while ((ch = getopt(argc, argv, "vh")) != -1) {
+	while ((ch = getopt(argc, argv, "vs:h")) != -1) {
 		switch (ch) {
 		case 'v':
 			verbose = 1;
+			break;
+		case 's':
+			serial = strtonum(optarg, 0, INT64_MAX, &errstr);
+			if (errstr)
+				errx(1, "strtonum: %s: %s", optarg, errstr);
 			break;
 		case 'h':
 		default:
@@ -49,6 +58,7 @@ main(int argc, char *argv[])
 	argv += optind;
 
 	config = cert_config_new();
+	cert_config_serial(config, serial);
 	cert = cert_new();
 	cert_create(cert, config);
 	cert_config_free(config);
