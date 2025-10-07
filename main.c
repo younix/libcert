@@ -18,6 +18,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 
 #include "cert.h"
@@ -27,6 +28,26 @@ usage(void)
 {
 	fputs("cert [-vh] [-a time] [-b time] [-s serial] [file]\n", stderr);
 	exit(1);
+}
+
+time_t
+date2time(const char *date)
+{
+	struct tm	 tm;
+	char		*fmt;
+
+	if (strlen(date) == 10)
+		fmt = "%F";
+	else if (strlen(date) == 19)
+		fmt = "%FT%T";
+	else
+		return -1;
+
+	memset(&tm, 0, sizeof tm);
+	if (strptime(date, fmt, &tm) == NULL)
+		return -1;
+
+	return timegm(&tm);
 }
 
 int
@@ -44,14 +65,14 @@ main(int argc, char *argv[])
 	while ((ch = getopt(argc, argv, "a:b:vs:h")) != -1) {
 		switch (ch) {
 		case 'a':
-			notAfter = strtonum(optarg, 0, INT64_MAX, &errstr);
-			if (errstr)
-				errx(1, "strtonum: %s: %s", optarg, errstr);
+			notAfter = date2time(optarg);
+			if (notAfter == -1)
+				errx(1, "invalid date: %s", optarg);
 			break;
 		case 'b':
-			notBefore = strtonum(optarg, 0, INT64_MAX, &errstr);
-			if (errstr)
-				errx(1, "strtonum: %s: %s", optarg, errstr);
+			notBefore = date2time(optarg);
+			if (notBefore == -1)
+				errx(1, "invalid date: %s", optarg);
 			break;
 		case 'v':
 			verbose = 1;
