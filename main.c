@@ -37,12 +37,12 @@ main(int argc, char *argv[])
 
 	while ((ch = getopt(argc, argv, "vh")) != -1) {
 		switch (ch) {
-			case 'v':
-				verbose = 1;
-				break;
-			case 'h':
-			default:
-				usage();
+		case 'v':
+			verbose = 1;
+			break;
+		case 'h':
+		default:
+			usage();
 		}
 	}
 	argc -= optind;
