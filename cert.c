@@ -393,15 +393,13 @@ cert_set_extended_key_usage(struct cert *cert)
 	return 1;
 }
 
-/* XXX - make this configurable. */
 static int
 cert_set_crl_distribution_points(struct cert *cert)
 {
 	X509_EXTENSION *ext;
-	const char *uris[] = {
-		"rsync://example.com/my.crl",
-		"https://example.com/my.crl",
-	};
+
+	if (cert->config->crl_len == 0)
+		return 1;
 
 	/* In a self-signed certificate, this extension MUST be omitted. */
 	if (cert->config->kind == CERT_KIND_TA)
@@ -412,7 +410,8 @@ cert_set_crl_distribution_points(struct cert *cert)
 	 * field. No CRLIssuer, no Reasons, no nameRelativeToCRLIssuer.
 	 */
 
-	if ((ext = ext_crl_distribution_points_new(uris, 2)) == NULL) {
+	if ((ext = ext_crl_distribution_points_new(cert->config->crl_list,
+	    cert->config->crl_len)) == NULL) {
 		cert->errstr = "ext_crl_distribution_points_new";
 		return 0;
 	}
@@ -670,6 +669,25 @@ void
 cert_config_free(struct cert_config *config)
 {
 	free(config);
+}
+
+int
+cert_config_add_crl_uri(struct cert_config *config, const char *uri)
+{
+	char **old = config->crl_list;
+
+	config->crl_len++;
+	config->crl_list = reallocarray(config->crl_list,
+	    sizeof config->crl_list[0], config->crl_len);
+	if (config->crl_list == NULL) {
+		free(old);
+		return 0;
+	}
+
+	if ((config->crl_list[config->crl_len - 1] = strdup(uri)) == NULL)
+		return 0;
+
+	return 1;
 }
 
 void

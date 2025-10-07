@@ -450,7 +450,7 @@ ext_data_general_name_from_uri(const char *uri)
 }
 
 static GENERAL_NAMES *
-ext_data_general_names_from_uris(const char *const uris[], size_t nuris)
+ext_data_general_names_from_uris(char **uris, size_t nuris)
 {
 	GENERAL_NAMES *names;
 	GENERAL_NAME *uri = NULL;
@@ -476,7 +476,7 @@ ext_data_general_names_from_uris(const char *const uris[], size_t nuris)
 }
 
 static CRL_DIST_POINTS *
-ext_data_crl_distribution_points_new(const char *const uris[], size_t nuris)
+ext_data_crl_distribution_points_new(char **uris, size_t nuris)
 {
 	CRL_DIST_POINTS *crldps = NULL;
 	DIST_POINT *distpoint = NULL;
@@ -541,7 +541,7 @@ ext_data_crl_distribution_points_new(const char *const uris[], size_t nuris)
  */
 
 X509_EXTENSION *
-ext_crl_distribution_points_new(const char *const uris[], size_t nuris)
+ext_crl_distribution_points_new(char **uris, size_t nuris)
 {
 	X509_EXTENSION *ext = NULL;
 	CRL_DIST_POINTS *crldp;

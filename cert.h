@@ -42,8 +42,7 @@ X509_EXTENSION	*ext_authority_key_identifier_new(EVP_PKEY *issuer_key);
 X509_EXTENSION	*ext_key_usage_new(uint32_t flags);
 X509_EXTENSION	*ext_extended_key_usage_new(uint64_t flags);
 X509_EXTENSION	*ext_certificate_policies_new(int nid, const char *cpsuri);
-X509_EXTENSION	*ext_crl_distribution_points_new(const char *const uris[],
-		    size_t nuris);
+X509_EXTENSION	*ext_crl_distribution_points_new(char **uris, size_t nuris);
 X509_EXTENSION	*ext_authority_info_access_new(const struct access_method *am);
 X509_EXTENSION	*ext_subject_info_access_new(const struct access_method ams[],
 		    size_t nams);
@@ -79,11 +78,14 @@ enum cert_kind {
 };
 
 struct cert_config {
-	enum keypair	keytype;
-	enum cert_kind	kind;
-	uint64_t	serial;
-	time_t		notBefore;
-	time_t		notAfter;
+	enum keypair	  keytype;
+	enum cert_kind	  kind;
+	uint64_t	  serial;
+	time_t		  notBefore;
+	time_t		  notAfter;
+	size_t		  crl_len;
+	char		**crl_list;
+//	char		 *crl_list[];
 };
 
 struct cert {
@@ -100,6 +102,7 @@ void	cert_config_free(struct cert_config *);
 void	cert_config_serial(struct cert_config *, uint64_t);
 void	cert_config_notBefore(struct cert_config *, time_t);
 void	cert_config_notAfter(struct cert_config *, time_t);
+int	cert_config_add_crl_uri(struct cert_config *, const char *);
 
 struct cert *
 	cert_new(void);

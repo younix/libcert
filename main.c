@@ -62,7 +62,10 @@ main(int argc, char *argv[])
 	int			 verbose = 0;
 	int			 ch;
 
-	while ((ch = getopt(argc, argv, "a:b:vs:h")) != -1) {
+	if ((config = cert_config_new()) == NULL)
+		err(1, "cert_config_new");
+
+	while ((ch = getopt(argc, argv, "a:b:r:vs:h")) != -1) {
 		switch (ch) {
 		case 'a':
 			notAfter = date2time(optarg);
@@ -73,6 +76,10 @@ main(int argc, char *argv[])
 			notBefore = date2time(optarg);
 			if (notBefore == -1)
 				errx(1, "invalid date: %s", optarg);
+			break;
+		case 'r':
+			if (cert_config_add_crl_uri(config, optarg) == 0)
+				err(1, "cert_config_add_crl_uri");
 			break;
 		case 'v':
 			verbose = 1;
@@ -89,9 +96,6 @@ main(int argc, char *argv[])
 	}
 	argc -= optind;
 	argv += optind;
-
-	if ((config = cert_config_new()) == NULL)
-		err(1, "cert_config_new");
 
 	cert_config_serial(config, serial);
 	cert_config_notBefore(config, notBefore);
