@@ -85,7 +85,6 @@ struct cert_config {
 	time_t		  notAfter;
 	size_t		  crl_len;
 	char		**crl_list;
-//	char		 *crl_list[];
 };
 
 struct cert {
