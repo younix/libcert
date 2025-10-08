@@ -71,7 +71,7 @@ main(int argc, char *argv[])
 	struct cert_config	*config;
 	struct cert		*cert;
 	const char		*errstr = NULL;
-	int64_t		 	 serial = 1;
+	int64_t		 	 serial;
 	time_t			 notBefore = 0;
 	time_t			 notAfter = 0;
 	int			 verbose = 0;
@@ -109,6 +109,7 @@ main(int argc, char *argv[])
 			serial = strtonum(optarg, 0, INT64_MAX, &errstr);
 			if (errstr)
 				errx(1, "strtonum: %s: %s", optarg, errstr);
+			cert_config_serial(config, serial);
 			break;
 		case 'h':
 		default:
@@ -118,7 +119,6 @@ main(int argc, char *argv[])
 	argc -= optind;
 	argv += optind;
 
-	cert_config_serial(config, serial);
 	cert_config_notBefore(config, notBefore);
 	cert_config_notAfter(config, notAfter);
 
