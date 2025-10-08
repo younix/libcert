@@ -27,7 +27,9 @@ void
 usage(void)
 {
 	fputs("cert [-vh] [-a time] [-b time] [-I issuer] [-S subject]"
-	    " [-s serial] [file]\n", stderr);
+	    " [-r uri] [-s serial]\n"
+	    "     [file]\n", stderr);
+
 	exit(1);
 }
 
