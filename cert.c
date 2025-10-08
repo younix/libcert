@@ -668,6 +668,10 @@ cert_config_new(void)
 void
 cert_config_free(struct cert_config *config)
 {
+	while (config->crl_len--)
+		free(config->crl_list[config->crl_len]);
+
+	free(config->crl_list);
 	free(config);
 }
 
