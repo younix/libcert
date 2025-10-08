@@ -77,6 +77,15 @@ enum cert_kind {
 	CERT_KIND_TA,	/* Trust Anchor */
 };
 
+enum cert_name {
+	ISSUER,
+	SUBJECT,
+};
+
+struct name {
+	char		*cn;
+};
+
 struct cert_config {
 	enum keypair	  keytype;
 	enum cert_kind	  kind;
@@ -85,6 +94,8 @@ struct cert_config {
 	time_t		  notAfter;
 	size_t		  crl_len;
 	char		**crl_list;
+	struct name	  issuer;
+	struct name	  subject;
 };
 
 struct cert {
@@ -102,6 +113,8 @@ void	cert_config_serial(struct cert_config *, uint64_t);
 void	cert_config_notBefore(struct cert_config *, time_t);
 void	cert_config_notAfter(struct cert_config *, time_t);
 int	cert_config_add_crl_uri(struct cert_config *, const char *);
+void	cert_config_issuer_cn(struct cert_config *, const char *);
+void	cert_config_subject_cn(struct cert_config *, const char *);
 
 struct cert *
 	cert_new(void);

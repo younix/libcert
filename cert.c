@@ -59,11 +59,25 @@ cert_generate_keys(struct cert *cert)
 }
 
 static int
-cert_set_common_name(struct cert *cert, EVP_PKEY *pkey, X509_NAME **out_name)
+cert_set_common_name(struct cert *cert, enum cert_name nameid, EVP_PKEY *pkey,
+    X509_NAME **out_name)
 {
+	struct name *namedat;
 	X509_NAME *name = NULL;
 	unsigned char md[EVP_MAX_MD_SIZE];
 	unsigned int md_len = EVP_MAX_MD_SIZE;
+
+	switch (nameid) {
+	case ISSUER:
+		namedat = &cert->config->issuer;
+		break;
+	case SUBJECT:
+		namedat = &cert->config->subject;
+		break;
+	default:
+		cert->errstr = "cert_set_common_name: illegal name";
+		return 0;
+	}
 
 	*out_name = NULL;
 
@@ -78,7 +92,7 @@ cert_set_common_name(struct cert *cert, EVP_PKEY *pkey, X509_NAME **out_name)
 	}
 
 	if (!X509_NAME_add_entry_by_NID(name, NID_commonName,
-	    V_ASN1_PRINTABLESTRING, (unsigned char *)"localhost", -1, -1, 0)) {
+	    V_ASN1_PRINTABLESTRING, (unsigned char *)namedat->cn, -1, -1, 0)) {
 		cert->errstr = "X509_NAME_add_entry_by_NID";
 		return 0;
 	}
@@ -91,14 +105,14 @@ cert_set_common_name(struct cert *cert, EVP_PKEY *pkey, X509_NAME **out_name)
 static int
 cert_issuer_from_key(struct cert *cert, EVP_PKEY *pkey, X509_NAME **out_issuer)
 {
-	return cert_set_common_name(cert, pkey, out_issuer);
+	return cert_set_common_name(cert, ISSUER, pkey, out_issuer);
 }
 
 static int
 cert_subject_from_key(struct cert *cert, EVP_PKEY *pkey,
     X509_NAME **out_subject)
 {
-	return cert_set_common_name(cert, pkey, out_subject);
+	return cert_set_common_name(cert, SUBJECT, pkey, out_subject);
 }
 
 static int
@@ -183,6 +197,9 @@ cert_set_issuer(struct cert *cert, EVP_PKEY *issuer_key)
 {
 	X509_NAME *issuer;
 
+	if (cert->config->issuer.cn == NULL)
+		cert->config->issuer.cn = strdup("localhost");
+
 	if (!cert_issuer_from_key(cert, issuer_key, &issuer))
 		return 0;
 
@@ -201,6 +218,9 @@ static int
 cert_set_subject(struct cert *cert, EVP_PKEY *subject_key)
 {
 	X509_NAME *subject;
+
+	if (cert->config->subject.cn == NULL)
+		cert->config->subject.cn = strdup("localhost");
 
 	if (!cert_subject_from_key(cert, subject_key, &subject))
 		return 0;
@@ -672,7 +692,20 @@ cert_config_free(struct cert_config *config)
 		free(config->crl_list[config->crl_len]);
 
 	free(config->crl_list);
+	free(config->issuer.cn);
 	free(config);
+}
+
+void
+cert_config_issuer_cn(struct cert_config *config, const char *cn)
+{
+	config->issuer.cn = strdup(cn);
+}
+
+void
+cert_config_subject_cn(struct cert_config *config, const char *cn)
+{
+	config->subject.cn = strdup(cn);
 }
 
 int

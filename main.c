@@ -26,8 +26,21 @@
 void
 usage(void)
 {
-	fputs("cert [-vh] [-a time] [-b time] [-s serial] [file]\n", stderr);
+	fputs("cert [-vh] [-a time] [-b time] [-I issuer] [-S subject]"
+	    " [-s serial] [file]\n", stderr);
 	exit(1);
+}
+
+void
+issuer(struct cert_config *config, const char *name)
+{
+	cert_config_issuer_cn(config, name);
+}
+
+void
+subject(struct cert_config *config, const char *name)
+{
+	cert_config_subject_cn(config, name);
 }
 
 time_t
@@ -65,7 +78,7 @@ main(int argc, char *argv[])
 	if ((config = cert_config_new()) == NULL)
 		err(1, "cert_config_new");
 
-	while ((ch = getopt(argc, argv, "a:b:r:vs:h")) != -1) {
+	while ((ch = getopt(argc, argv, "a:b:I:S:r:vs:h")) != -1) {
 		switch (ch) {
 		case 'a':
 			notAfter = date2time(optarg);
@@ -76,6 +89,12 @@ main(int argc, char *argv[])
 			notBefore = date2time(optarg);
 			if (notBefore == -1)
 				errx(1, "invalid date: %s", optarg);
+			break;
+		case 'I':
+			issuer(config, optarg);
+			break;
+		case 'S':
+			subject(config, optarg);
 			break;
 		case 'r':
 			if (cert_config_add_crl_uri(config, optarg) == 0)
