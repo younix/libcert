@@ -77,11 +77,6 @@ enum cert_kind {
 	CERT_KIND_TA,	/* Trust Anchor */
 };
 
-enum cert_name {
-	ISSUER,
-	SUBJECT,
-};
-
 struct name {
 	char		*cn;
 	char		*c;

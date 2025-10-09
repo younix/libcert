@@ -59,22 +59,9 @@ cert_generate_keys(struct cert *cert)
 }
 
 static int
-cert_set_name(struct cert *cert, enum cert_name nameid, X509_NAME **out_name)
+cert_set_name(struct cert *cert, struct name *namedat, X509_NAME **out_name)
 {
-	struct name *namedat;
 	X509_NAME *name = NULL;
-
-	switch (nameid) {
-	case ISSUER:
-		namedat = &cert->config->issuer;
-		break;
-	case SUBJECT:
-		namedat = &cert->config->subject;
-		break;
-	default:
-		cert->errstr = "cert_set_common_name: illegal name";
-		return 0;
-	}
 
 	*out_name = NULL;
 
@@ -103,13 +90,13 @@ cert_set_name(struct cert *cert, enum cert_name nameid, X509_NAME **out_name)
 static int
 cert_issuer_from_key(struct cert *cert, X509_NAME **out_issuer)
 {
-	return cert_set_name(cert, ISSUER, out_issuer);
+	return cert_set_name(cert, &cert->config->issuer, out_issuer);
 }
 
 static int
 cert_subject_from_key(struct cert *cert, X509_NAME **out_subject)
 {
-	return cert_set_name(cert, SUBJECT, out_subject);
+	return cert_set_name(cert, &cert->config->subject, out_subject);
 }
 
 static int
