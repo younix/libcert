@@ -59,7 +59,7 @@ cert_generate_keys(struct cert *cert)
 }
 
 static int
-cert_set_common_name(struct cert *cert, enum cert_name nameid, EVP_PKEY *pkey,
+cert_set_name(struct cert *cert, enum cert_name nameid, EVP_PKEY *pkey,
     X509_NAME **out_name)
 {
 	struct name *namedat;
@@ -91,8 +91,14 @@ cert_set_common_name(struct cert *cert, enum cert_name nameid, EVP_PKEY *pkey,
 		return 0;
 	}
 
-	if (!X509_NAME_add_entry_by_NID(name, NID_commonName,
+	if (namedat->cn && !X509_NAME_add_entry_by_NID(name, NID_commonName,
 	    V_ASN1_PRINTABLESTRING, (unsigned char *)namedat->cn, -1, -1, 0)) {
+		cert->errstr = "X509_NAME_add_entry_by_NID";
+		return 0;
+	}
+
+	if (namedat->c && !X509_NAME_add_entry_by_NID(name, NID_countryName,
+	    V_ASN1_PRINTABLESTRING, (unsigned char *)namedat->c, -1, -1, 0)) {
 		cert->errstr = "X509_NAME_add_entry_by_NID";
 		return 0;
 	}
@@ -105,14 +111,14 @@ cert_set_common_name(struct cert *cert, enum cert_name nameid, EVP_PKEY *pkey,
 static int
 cert_issuer_from_key(struct cert *cert, EVP_PKEY *pkey, X509_NAME **out_issuer)
 {
-	return cert_set_common_name(cert, ISSUER, pkey, out_issuer);
+	return cert_set_name(cert, ISSUER, pkey, out_issuer);
 }
 
 static int
 cert_subject_from_key(struct cert *cert, EVP_PKEY *pkey,
     X509_NAME **out_subject)
 {
-	return cert_set_common_name(cert, SUBJECT, pkey, out_subject);
+	return cert_set_name(cert, SUBJECT, pkey, out_subject);
 }
 
 static int
@@ -197,7 +203,8 @@ cert_set_issuer(struct cert *cert, EVP_PKEY *issuer_key)
 {
 	X509_NAME *issuer;
 
-	if (cert->config->issuer.cn == NULL)
+	if (cert->config->issuer.cn == NULL &&
+	    cert->config->issuer.c == NULL)
 		cert->config->issuer.cn = strdup("localhost");
 
 	if (!cert_issuer_from_key(cert, issuer_key, &issuer))
@@ -219,7 +226,8 @@ cert_set_subject(struct cert *cert, EVP_PKEY *subject_key)
 {
 	X509_NAME *subject;
 
-	if (cert->config->subject.cn == NULL)
+	if (cert->config->subject.cn == NULL &&
+	    cert->config->subject.c == NULL)
 		cert->config->subject.cn = strdup("localhost");
 
 	if (!cert_subject_from_key(cert, subject_key, &subject))
@@ -703,9 +711,21 @@ cert_config_issuer_cn(struct cert_config *config, const char *cn)
 }
 
 void
+cert_config_issuer_country(struct cert_config *config, const char *country)
+{
+	config->issuer.c = strdup(country);
+}
+
+void
 cert_config_subject_cn(struct cert_config *config, const char *cn)
 {
 	config->subject.cn = strdup(cn);
+}
+
+void
+cert_config_subject_country(struct cert_config *config, const char *country)
+{
+	config->subject.c = strdup(country);
 }
 
 int

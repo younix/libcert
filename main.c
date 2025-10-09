@@ -34,15 +34,31 @@ usage(void)
 }
 
 void
-issuer(struct cert_config *config, const char *name)
+issuer(struct cert_config *config, char *name)
 {
-	cert_config_issuer_cn(config, name);
+	char *key;
+
+	if ((key = strsep(&name, "=")) == NULL)
+		errx(1, "illegal name: %s", name);
+
+	if (strcmp(key, "CN") == 0)
+		cert_config_issuer_cn(config, name);
+	if (strcmp(key, "C") == 0)
+		cert_config_issuer_country(config, name);
 }
 
 void
-subject(struct cert_config *config, const char *name)
+subject(struct cert_config *config, char *name)
 {
-	cert_config_subject_cn(config, name);
+	char *key;
+
+	if ((key = strsep(&name, "=")) == NULL)
+		errx(1, "illegal name: %s", name);
+
+	if (strcmp(key, "CN") == 0)
+		cert_config_subject_cn(config, name);
+	if (strcmp(key, "C") == 0)
+		cert_config_subject_country(config, name);
 }
 
 time_t
