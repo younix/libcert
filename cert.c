@@ -70,21 +70,42 @@ cert_set_name(struct cert *cert, struct name *namedat, X509_NAME **out_name)
 		return 0;
 	}
 
-	if (namedat->cn && !X509_NAME_add_entry_by_NID(name, NID_commonName,
-	    V_ASN1_PRINTABLESTRING, (unsigned char *)namedat->cn, -1, -1, 0)) {
-		cert->errstr = "X509_NAME_add_entry_by_NID";
-		return 0;
-	}
-
 	if (namedat->c && !X509_NAME_add_entry_by_NID(name, NID_countryName,
-	    V_ASN1_PRINTABLESTRING, (unsigned char *)namedat->c, -1, -1, 0)) {
-		cert->errstr = "X509_NAME_add_entry_by_NID";
-		return 0;
-	}
+	    V_ASN1_PRINTABLESTRING, (unsigned char *)namedat->c, -1, -1, 0))
+		goto err;
+
+	if (namedat->o && !X509_NAME_add_entry_by_NID(name, NID_organizationName,
+	    V_ASN1_PRINTABLESTRING, (unsigned char *)namedat->o, -1, -1, 0))
+		goto err;
+
+	if (namedat->ou && !X509_NAME_add_entry_by_NID(name, NID_organizationalUnitName,
+	    V_ASN1_PRINTABLESTRING, (unsigned char *)namedat->ou, -1, -1, 0))
+		goto err;
+
+	if (namedat->dnq && !X509_NAME_add_entry_by_NID(name, NID_distinguishedName,
+	    V_ASN1_PRINTABLESTRING, (unsigned char *)namedat->dnq, -1, -1, 0))
+		goto err;
+
+	if (namedat->st && !X509_NAME_add_entry_by_NID(name, NID_stateOrProvinceName,
+	    V_ASN1_PRINTABLESTRING, (unsigned char *)namedat->st, -1, -1, 0))
+		goto err;
+
+	if (namedat->cn && !X509_NAME_add_entry_by_NID(name, NID_commonName,
+	    V_ASN1_PRINTABLESTRING, (unsigned char *)namedat->cn, -1, -1, 0))
+		goto err;
+
+	if (namedat->ser && !X509_NAME_add_entry_by_NID(name, NID_serialNumber,
+	    V_ASN1_PRINTABLESTRING, (unsigned char *)namedat->ser, -1, -1, 0))
+		goto err;
 
 	*out_name = name;
 
 	return 1;
+ err:
+	cert->errstr = "X509_NAME_add_entry_by_NID";
+	X509_NAME_free(name);
+
+	return 0;
 }
 
 static int
@@ -169,8 +190,13 @@ cert_set_issuer(struct cert *cert)
 {
 	X509_NAME *issuer;
 
-	if (cert->config->issuer.cn == NULL &&
-	    cert->config->issuer.c == NULL)
+	if (cert->config->issuer.c == NULL &&
+	    cert->config->issuer.o == NULL &&
+	    cert->config->issuer.ou == NULL &&
+	    cert->config->issuer.dnq == NULL &&
+	    cert->config->issuer.st == NULL &&
+	    cert->config->issuer.cn == NULL &&
+	    cert->config->issuer.ser == NULL)
 		cert->config->issuer.cn = strdup("localhost");
 
 	if (!cert_set_name(cert, &cert->config->issuer, &issuer))
@@ -192,8 +218,13 @@ cert_set_subject(struct cert *cert)
 {
 	X509_NAME *subject;
 
-	if (cert->config->subject.cn == NULL &&
-	    cert->config->subject.c == NULL)
+	if (cert->config->subject.c == NULL &&
+	    cert->config->subject.o == NULL &&
+	    cert->config->subject.ou == NULL &&
+	    cert->config->subject.dnq == NULL &&
+	    cert->config->subject.st == NULL &&
+	    cert->config->subject.cn == NULL &&
+	    cert->config->subject.ser == NULL)
 		cert->config->subject.cn = strdup("localhost");
 
 	if (!cert_set_name(cert, &cert->config->subject, &subject))
@@ -670,6 +701,40 @@ cert_config_free(struct cert_config *config)
 	free(config);
 }
 
+/*
+ * Configure Issuer Names
+ */
+
+void
+cert_config_issuer_c(struct cert_config *config, const char *c)
+{
+	config->issuer.c = strdup(c);
+}
+
+void
+cert_config_issuer_o(struct cert_config *config, const char *o)
+{
+	config->issuer.o = strdup(o);
+}
+
+void
+cert_config_issuer_ou(struct cert_config *config, const char *ou)
+{
+	config->issuer.ou = strdup(ou);
+}
+
+void
+cert_config_issuer_dnq(struct cert_config *config, const char *dnq)
+{
+	config->issuer.dnq = strdup(dnq);
+}
+
+void
+cert_config_issuer_st(struct cert_config *config, const char *st)
+{
+	config->issuer.st = strdup(st);
+}
+
 void
 cert_config_issuer_cn(struct cert_config *config, const char *cn)
 {
@@ -677,9 +742,43 @@ cert_config_issuer_cn(struct cert_config *config, const char *cn)
 }
 
 void
-cert_config_issuer_country(struct cert_config *config, const char *country)
+cert_config_issuer_ser(struct cert_config *config, const char *ser)
 {
-	config->issuer.c = strdup(country);
+	config->issuer.ser = strdup(ser);
+}
+
+/*
+ * Configure Subject Names
+ */
+
+void
+cert_config_subject_c(struct cert_config *config, const char *c)
+{
+	config->subject.c = strdup(c);
+}
+
+void
+cert_config_subject_o(struct cert_config *config, const char *o)
+{
+	config->subject.o = strdup(o);
+}
+
+void
+cert_config_subject_ou(struct cert_config *config, const char *ou)
+{
+	config->subject.ou = strdup(ou);
+}
+
+void
+cert_config_subject_dnq(struct cert_config *config, const char *dnq)
+{
+	config->subject.dnq = strdup(dnq);
+}
+
+void
+cert_config_subject_st(struct cert_config *config, const char *st)
+{
+	config->subject.st = strdup(st);
 }
 
 void
@@ -689,9 +788,9 @@ cert_config_subject_cn(struct cert_config *config, const char *cn)
 }
 
 void
-cert_config_subject_country(struct cert_config *config, const char *country)
+cert_config_subject_ser(struct cert_config *config, const char *ser)
 {
-	config->subject.c = strdup(country);
+	config->subject.ser = strdup(ser);
 }
 
 int

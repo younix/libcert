@@ -78,8 +78,13 @@ enum cert_kind {
 };
 
 struct name {
-	char		*cn;
-	char		*c;
+	char	*c;	/* country */
+	char	*o;	/* organization */
+	char	*ou;	/* organizational unit */
+	char	*dnq;	/* distinguished name qualifier */
+	char	*st;	/* state or province name */
+	char	*cn;	/* common name */
+	char	*ser;	/* serial number */
 };
 
 struct cert_config {
@@ -109,10 +114,22 @@ void	cert_config_serial(struct cert_config *, uint64_t);
 void	cert_config_notBefore(struct cert_config *, time_t);
 void	cert_config_notAfter(struct cert_config *, time_t);
 int	cert_config_add_crl_uri(struct cert_config *, const char *);
+
+void	cert_config_issuer_c(struct cert_config *, const char *);
+void	cert_config_issuer_o(struct cert_config *, const char *);
+void	cert_config_issuer_ou(struct cert_config *, const char *);
+void	cert_config_issuer_dnq(struct cert_config *, const char *);
+void	cert_config_issuer_st(struct cert_config *, const char *);
 void	cert_config_issuer_cn(struct cert_config *, const char *);
-void	cert_config_issuer_country(struct cert_config *, const char *);
+void	cert_config_issuer_ser(struct cert_config *, const char *);
+
+void	cert_config_subject_c(struct cert_config *, const char *);
+void	cert_config_subject_o(struct cert_config *, const char *);
+void	cert_config_subject_ou(struct cert_config *, const char *);
+void	cert_config_subject_dnq(struct cert_config *, const char *);
+void	cert_config_subject_st(struct cert_config *, const char *);
 void	cert_config_subject_cn(struct cert_config *, const char *);
-void	cert_config_subject_country(struct cert_config *, const char *);
+void	cert_config_subject_ser(struct cert_config *, const char *);
 
 struct cert *
 	cert_new(void);

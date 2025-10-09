@@ -41,10 +41,20 @@ issuer(struct cert_config *config, char *name)
 	if ((key = strsep(&name, "=")) == NULL)
 		errx(1, "illegal name: %s", name);
 
-	if (strcmp(key, "CN") == 0)
-		cert_config_issuer_cn(config, name);
 	if (strcmp(key, "C") == 0)
-		cert_config_issuer_country(config, name);
+		cert_config_issuer_c(config, name);
+	else if (strcmp(key, "O") == 0)
+		cert_config_issuer_o(config, name);
+	else if (strcmp(key, "OU") == 0)
+		cert_config_issuer_ou(config, name);
+	else if (strcmp(key, "DNQ") == 0)
+		cert_config_issuer_dnq(config, name);
+	else if (strcmp(key, "ST") == 0)
+		cert_config_issuer_st(config, name);
+	else if (strcmp(key, "CN") == 0)
+		cert_config_issuer_cn(config, name);
+	else if (strcmp(key, "SER") == 0)
+		cert_config_issuer_ser(config, name);
 }
 
 void
@@ -55,10 +65,20 @@ subject(struct cert_config *config, char *name)
 	if ((key = strsep(&name, "=")) == NULL)
 		errx(1, "illegal name: %s", name);
 
-	if (strcmp(key, "CN") == 0)
-		cert_config_subject_cn(config, name);
 	if (strcmp(key, "C") == 0)
-		cert_config_subject_country(config, name);
+		cert_config_subject_c(config, name);
+	else if (strcmp(key, "O") == 0)
+		cert_config_subject_o(config, name);
+	else if (strcmp(key, "OU") == 0)
+		cert_config_subject_ou(config, name);
+	else if (strcmp(key, "DNQ") == 0)
+		cert_config_subject_dnq(config, name);
+	else if (strcmp(key, "ST") == 0)
+		cert_config_subject_st(config, name);
+	else if (strcmp(key, "CN") == 0)
+		cert_config_subject_cn(config, name);
+	else if (strcmp(key, "SER") == 0)
+		cert_config_subject_ser(config, name);
 }
 
 time_t
