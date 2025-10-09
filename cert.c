@@ -88,18 +88,6 @@ cert_set_name(struct cert *cert, struct name *namedat, X509_NAME **out_name)
 }
 
 static int
-cert_issuer_from_key(struct cert *cert, X509_NAME **out_issuer)
-{
-	return cert_set_name(cert, &cert->config->issuer, out_issuer);
-}
-
-static int
-cert_subject_from_key(struct cert *cert, X509_NAME **out_subject)
-{
-	return cert_set_name(cert, &cert->config->subject, out_subject);
-}
-
-static int
 cert_set_version(struct cert *cert)
 {
 	if (!X509_set_version(cert->x509, X509_VERSION_3)) {
@@ -185,7 +173,7 @@ cert_set_issuer(struct cert *cert)
 	    cert->config->issuer.c == NULL)
 		cert->config->issuer.cn = strdup("localhost");
 
-	if (!cert_issuer_from_key(cert, &issuer))
+	if (!cert_set_name(cert, &cert->config->issuer, &issuer))
 		return 0;
 
 	if (!X509_set_issuer_name(cert->x509, issuer)) {
@@ -208,7 +196,7 @@ cert_set_subject(struct cert *cert)
 	    cert->config->subject.c == NULL)
 		cert->config->subject.cn = strdup("localhost");
 
-	if (!cert_subject_from_key(cert, &subject))
+	if (!cert_set_name(cert, &cert->config->subject, &subject))
 		return 0;
 
 	if (!X509_set_subject_name(cert->x509, subject)) {
