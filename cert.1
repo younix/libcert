@@ -1,0 +1,136 @@
+.\"	$OpenBSD$
+.\"
+.\" Copyright (c) 2025 Jan Klemkow <j.klemkow@wemelug.de>
+.\"
+.\" Permission to use, copy, modify, and distribute this software for any
+.\" purpose with or without fee is hereby granted, provided that the above
+.\" copyright notice and this permission notice appear in all copies.
+.\"
+.\" THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+.\" WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+.\" MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+.\" ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+.\" WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+.\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+.\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+.\"
+.Dd $Mdocdate$
+.Dt CERT 1
+.Os
+.Sh NAME
+.Nm cert
+.Nd x509 certificate tool
+.Sh SYNOPSIS
+.Nm
+.Op Fl vh
+.Op Fl a Ar time
+.Op Fl b Ar time
+.Op Fl c Ar cps
+.Op Fl I Ar key=name
+.Op Fl S Ar key=name
+.Op Fl s Ar serial
+.Op Fl t Ar type
+.Op Fl r Ar uri
+.Op Ar file
+.Sh DESCRIPTION
+The
+.Nm
+utility creates an x509 certificate and optionally writes it into
+.Ar file .
+.Pp
+The options are as follows:
+.Bl -tag -width Ds
+.It Fl a Ar time
+The certificate is not valid after
+.Ar time .
+The default value is a reasonable offset to
+.Fl b
+option.
+The default offset depend on the type of the certificate
+.Pq see option Fl t .
+.Pp
+Valid time formats are
+.Qq YYYY-MM-DD
+and
+.Qq YYYY-MM-DDTHH:MM:SS .
+.It Fl b Ar time
+The certificate is not valid before
+.Ar time .
+The default value is now.
+.Pp
+Valid time formats are
+.Qq YYYY-MM-DD
+and
+.Qq YYYY-MM-DDTHH:MM:SS .
+.It Fl c Ar cps
+Sets the certification practice statement to
+.Ar cps .
+.It Fl h
+Shows usage message.
+.It Fl I Ar key=name
+Sets the issuer name information.
+See
+.Sx NAME FORMAT .
+.It Fl S Ar key=name
+Sets the subject name information.
+See
+.Sx NAME FORMAT .
+.It Fl s Ar serial
+Sets the serial number of the certificate to
+.Ar serial .
+.It Fl t Ar type
+Sets the type of the certificate.
+Valid types are
+.Qq ee
+.Pq End Entity ,
+.Qq ca
+.Pq Certificate Authority
+and
+.Qq ta
+.Pq Trust Anchor .
+.It Fl r Ar uri
+Adds a
+.Ar uri
+to the certificate revocation list.
+.It Fl v
+Prints the created x509 certificate in human readable form.
+See
+.Xr X509_print 3 .
+.El
+.Ss NAME FORMAT
+The name format are key value pairs.
+The folling
+.Ar keys
+are valid:
+.Bl -tag -width Ds
+.It Cm C
+Country
+.It Cm O
+Organization
+.It Cm OU
+Organizational Unit
+.It Cm DQN
+Distinguished Name Qualifier
+.It Cm ST
+State or Province Name
+.It Cm CN
+Common Name
+.It Cm SER
+Serial Number
+.El
+.Sh EXIT STATUS
+.Ex -std cert
+.Sh EXAMPLES
+cert -v
+.Pp
+cert -S C=CA -S ST=Alberta -S O=OpenBSD
+.Sh SEE ALSO
+.Xr openssl 1
+.Sh STANDARDS
+RFC 5280: Internet X.509 Public Key Infrastructure Certificate and Certificate
+Revocation List (CRL) Profile.
+.Sh AUTHORS
+The
+.Nm
+program was written by
+.An Jan Klemkow Aq Mt j.klemkow@wemelug.de .
