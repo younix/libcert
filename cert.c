@@ -697,7 +697,23 @@ cert_config_free(struct cert_config *config)
 		free(config->crl_list[config->crl_len]);
 
 	free(config->crl_list);
+
+	free(config->issuer.c);
+	free(config->issuer.o);
+	free(config->issuer.ou);
+	free(config->issuer.dnq);
+	free(config->issuer.st);
 	free(config->issuer.cn);
+	free(config->issuer.ser);
+
+	free(config->subject.c);
+	free(config->subject.o);
+	free(config->subject.ou);
+	free(config->subject.dnq);
+	free(config->subject.st);
+	free(config->subject.cn);
+	free(config->subject.ser);
+
 	free(config);
 }
 
