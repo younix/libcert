@@ -40,6 +40,8 @@ issuer(struct cert_config *config, char *name)
 
 	if ((key = strsep(&name, "=")) == NULL)
 		errx(1, "illegal name: %s", name);
+	if (name == NULL || name[0] == '\0')
+		errx(1, "empty issuer name");
 
 	if (strcmp(key, "C") == 0)
 		cert_config_issuer_c(config, name);
@@ -55,6 +57,8 @@ issuer(struct cert_config *config, char *name)
 		cert_config_issuer_cn(config, name);
 	else if (strcmp(key, "SER") == 0)
 		cert_config_issuer_ser(config, name);
+	else
+		errx(1, "unknown issuer name: %s", key);
 }
 
 void
@@ -64,6 +68,8 @@ subject(struct cert_config *config, char *name)
 
 	if ((key = strsep(&name, "=")) == NULL)
 		errx(1, "illegal name: %s", name);
+	if (name == NULL || name[0] == '\0')
+		errx(1, "empty subject name");
 
 	if (strcmp(key, "C") == 0)
 		cert_config_subject_c(config, name);
@@ -79,6 +85,8 @@ subject(struct cert_config *config, char *name)
 		cert_config_subject_cn(config, name);
 	else if (strcmp(key, "SER") == 0)
 		cert_config_subject_ser(config, name);
+	else
+		errx(1, "unknown subject name: %s", key);
 }
 
 time_t
