@@ -861,8 +861,10 @@ cert_create(struct cert *cert, struct cert_config *config)
 	if (cert == NULL)
 		return 0;
 
-	if (config == NULL)
+	if (config == NULL) {
+		cert->errstr = "certificate configuration is NULL";
 		return 0;
+	}
 
 	cert->config = config;
 
