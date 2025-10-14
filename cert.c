@@ -523,7 +523,7 @@ cert_set_certificate_policies(struct cert *cert)
 	X509_EXTENSION *ext;
 
 	if ((ext = ext_certificate_policies_new(NID_ipAddr_asNumber,
-	    "https://example.com/CPS.pdf")) == NULL) {
+	    cert->config->cps)) == NULL) {
 		cert->errstr = "ext_certificate_policies_new";
 		return 0;
 	}
@@ -696,6 +696,7 @@ cert_config_free(struct cert_config *config)
 	while (config->crl_len--)
 		free(config->crl_list[config->crl_len]);
 
+	free(config->cps);
 	free(config->crl_list);
 
 	free(config->issuer.c);
@@ -829,6 +830,12 @@ void
 cert_config_subject_ser(struct cert_config *config, const char *ser)
 {
 	config->subject.ser = strdup(ser);
+}
+
+void
+cert_config_set_cps(struct cert_config *config, const char *cps)
+{
+	config->cps = strdup(cps);
 }
 
 int

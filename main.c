@@ -28,7 +28,7 @@ usage(void)
 {
 	fputs("cert [-vh] [-a time] [-b time] [-I issuer] [-S subject]"
 	    " [-r uri] [-s serial]\n"
-	    "     [-t type] [file]\n", stderr);
+	    "     [-t type] [-c cps] [file]\n", stderr);
 
 	exit(1);
 }
@@ -124,7 +124,7 @@ main(int argc, char *argv[])
 	if ((config = cert_config_new()) == NULL)
 		err(1, "cert_config_new");
 
-	while ((ch = getopt(argc, argv, "a:b:I:S:t:r:vs:h")) != -1) {
+	while ((ch = getopt(argc, argv, "a:b:c:I:S:t:r:vs:h")) != -1) {
 		switch (ch) {
 		case 'a':
 			notAfter = date2time(optarg);
@@ -135,6 +135,9 @@ main(int argc, char *argv[])
 			notBefore = date2time(optarg);
 			if (notBefore == -1)
 				errx(1, "invalid date: %s", optarg);
+			break;
+		case 'c':
+			cert_config_set_cps(config, optarg);
 			break;
 		case 'I':
 			issuer(config, optarg);
