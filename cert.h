@@ -110,6 +110,9 @@ struct cert {
 struct cert_config *
 	cert_config_new(void);
 void	cert_config_free(struct cert_config *);
+void	cert_config_set_ee(struct cert_config *);
+void	cert_config_set_ca(struct cert_config *);
+void	cert_config_set_ta(struct cert_config *);
 void	cert_config_serial(struct cert_config *, uint64_t);
 void	cert_config_notBefore(struct cert_config *, time_t);
 void	cert_config_notAfter(struct cert_config *, time_t);

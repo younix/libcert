@@ -702,6 +702,28 @@ cert_config_free(struct cert_config *config)
 }
 
 /*
+ * Configure Certificate Type
+ */
+
+void
+cert_config_set_ee(struct cert_config *config)
+{
+	config->kind = CERT_KIND_EE;
+}
+
+void
+cert_config_set_ca(struct cert_config *config)
+{
+	config->kind = CERT_KIND_CA;
+}
+
+void
+cert_config_set_ta(struct cert_config *config)
+{
+	config->kind = CERT_KIND_TA;
+}
+
+/*
  * Configure Issuer Names
  */
 

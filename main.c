@@ -28,7 +28,7 @@ usage(void)
 {
 	fputs("cert [-vh] [-a time] [-b time] [-I issuer] [-S subject]"
 	    " [-r uri] [-s serial]\n"
-	    "     [file]\n", stderr);
+	    "     [-t type] [file]\n", stderr);
 
 	exit(1);
 }
@@ -116,7 +116,7 @@ main(int argc, char *argv[])
 	if ((config = cert_config_new()) == NULL)
 		err(1, "cert_config_new");
 
-	while ((ch = getopt(argc, argv, "a:b:I:S:r:vs:h")) != -1) {
+	while ((ch = getopt(argc, argv, "a:b:I:S:t:r:vs:h")) != -1) {
 		switch (ch) {
 		case 'a':
 			notAfter = date2time(optarg);
@@ -133,6 +133,16 @@ main(int argc, char *argv[])
 			break;
 		case 'S':
 			subject(config, optarg);
+			break;
+		case 't':
+			if (strcmp(optarg, "ee") == 0)
+				cert_config_set_ee(config);
+			else if (strcmp(optarg, "ca") == 0)
+				cert_config_set_ca(config);
+			else if (strcmp(optarg, "ta") == 0)
+				cert_config_set_ta(config);
+			else
+				err(1, "unknown certificate type: %s", optarg);
 			break;
 		case 'r':
 			if (cert_config_add_crl_uri(config, optarg) == 0)
