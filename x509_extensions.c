@@ -24,6 +24,7 @@
 #include <openssl/x509.h>
 #include <openssl/x509v3.h>
 
+#include "cert_internal.h"
 #include "cert.h"
 
 /*

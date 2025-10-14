@@ -23,6 +23,7 @@
 #include <openssl/rsa.h>
 #include <openssl/x509v3.h>
 
+#include "cert_internal.h"
 #include "cert.h"
 
 /*

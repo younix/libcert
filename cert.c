@@ -31,6 +31,7 @@
 #include <openssl/x509.h>
 #include <openssl/x509v3.h>
 
+#include "cert_internal.h"
 #include "cert.h"
 
 /*
@@ -919,4 +920,10 @@ cert_create(struct cert *cert, struct cert_config *config)
 	cert_from_subject_and_issuer_key(cert, cert->key, cert->key);
 
 	return 1;
+}
+
+X509 *
+cert_get_x509(struct cert *cert)
+{
+	return cert->x509;
 }

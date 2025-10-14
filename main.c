@@ -19,7 +19,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #include <unistd.h>
+
+#include <openssl/x509.h>
+#include <openssl/pem.h>
 
 #include "cert.h"
 
@@ -115,6 +119,7 @@ main(int argc, char *argv[])
 	struct cert_config	*config;
 	struct cert		*cert;
 	const char		*errstr = NULL;
+	X509			*x509;
 	int64_t		 	 serial;
 	time_t			 notBefore = 0;
 	time_t			 notAfter = 0;
@@ -185,8 +190,10 @@ main(int argc, char *argv[])
 	cert_create(cert, config);
 	cert_config_free(config);
 
+	x509 = cert_get_x509(cert);
+
 	if (verbose)
-		X509_print_fp(stdout, cert->x509);
+		X509_print_fp(stdout, x509);
 
 	if (argc == 1) {
 		FILE *fh;
@@ -195,7 +202,7 @@ main(int argc, char *argv[])
 		if ((fh = fopen(path, "w")) == NULL)
 			err(1, "%s", path);
 
-		if (PEM_write_X509(fh, cert->x509) == 0)
+		if (PEM_write_X509(fh, x509) == 0)
 			err(1, "%s", path);
 
 		if (fclose(fh) == EOF)
