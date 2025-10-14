@@ -142,7 +142,7 @@ main(int argc, char *argv[])
 			else if (strcmp(optarg, "ta") == 0)
 				cert_config_set_ta(config);
 			else
-				err(1, "unknown certificate type: %s", optarg);
+				errx(1, "unknown certificate type: %s", optarg);
 			break;
 		case 'r':
 			if (cert_config_add_crl_uri(config, optarg) == 0)
