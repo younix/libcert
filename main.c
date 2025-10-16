@@ -150,6 +150,12 @@ main(int argc, char *argv[])
 		case 'S':
 			subject(config, optarg);
 			break;
+		case 's':
+			serial = strtonum(optarg, 0, INT64_MAX, &errstr);
+			if (errstr)
+				errx(1, "strtonum: %s: %s", optarg, errstr);
+			cert_config_serial(config, serial);
+			break;
 		case 't':
 			if (strcmp(optarg, "ee") == 0)
 				cert_config_set_ee(config);
@@ -166,12 +172,6 @@ main(int argc, char *argv[])
 			break;
 		case 'v':
 			verbose = 1;
-			break;
-		case 's':
-			serial = strtonum(optarg, 0, INT64_MAX, &errstr);
-			if (errstr)
-				errx(1, "strtonum: %s: %s", optarg, errstr);
-			cert_config_serial(config, serial);
 			break;
 		case 'h':
 		default:
