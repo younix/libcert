@@ -102,8 +102,9 @@ struct cert_config {
 
 struct cert {
 	struct cert_config	*config;
-	EVP_PKEY		*key;
 	X509			*x509;
+	EVP_PKEY		*issuer;
+	EVP_PKEY		*subject;
 
 	const char		*errstr;
 };

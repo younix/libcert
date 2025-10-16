@@ -159,7 +159,7 @@ keypair_extract_public(struct cert *cert)
 	X509_PUBKEY *x509_pubkey = NULL;
 	EVP_PKEY *pubkey = NULL, *ret = NULL;
 
-	if (!X509_PUBKEY_set(&x509_pubkey, cert->key)) {
+	if (!X509_PUBKEY_set(&x509_pubkey, cert->subject)) {
 		cert->errstr = "X509_PUBKEY_set";
 		goto err;
 	}

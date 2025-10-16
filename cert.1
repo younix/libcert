@@ -27,6 +27,8 @@
 .Op Fl b Ar time
 .Op Fl c Ar cps
 .Op Fl I Ar key=name
+.Op Fl i Ar file
+.Op Fl k Ar file
 .Op Fl S Ar key=name
 .Op Fl s Ar serial
 .Op Fl t Ar type
@@ -71,6 +73,12 @@ Shows usage message.
 Sets the issuer name information.
 See
 .Sx NAME FORMAT .
+.It Fl i Ar file
+Load issuer key from
+.Ar file .
+.It Fl k Ar file
+Load subject key from
+.Ar file .
 .It Fl S Ar key=name
 Sets the subject name information.
 See

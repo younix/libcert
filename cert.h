@@ -52,6 +52,8 @@ void	cert_config_subject_ser(struct cert_config *, const char *);
 
 struct cert *
 	cert_new(void);
+int	cert_load_issuer_key(struct cert *, const char *);
+int	cert_load_subject_key(struct cert *, const char *);
 int	cert_create(struct cert *cert, struct cert_config *);
 void	cert_free(struct cert *);
 int	cert_crt_data(struct cert *, uint8_t **, size_t *);

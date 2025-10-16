@@ -32,7 +32,7 @@ usage(void)
 {
 	fputs("cert [-vh] [-a time] [-b time] [-I issuer] [-S subject]"
 	    " [-r uri] [-s serial]\n"
-	    "     [-t type] [-c cps] [file]\n", stderr);
+	    "     [-i file] [-k file] [-t type] [-c cps] [file]\n", stderr);
 
 	exit(1);
 }
@@ -129,7 +129,10 @@ main(int argc, char *argv[])
 	if ((config = cert_config_new()) == NULL)
 		err(1, "cert_config_new");
 
-	while ((ch = getopt(argc, argv, "a:b:c:I:S:t:r:vs:h")) != -1) {
+	if ((cert = cert_new()) == NULL)
+		err(1, "cert_new");
+
+	while ((ch = getopt(argc, argv, "a:b:c:I:i:k:S:t:r:vs:h")) != -1) {
 		switch (ch) {
 		case 'a':
 			notAfter = date2time(optarg);
@@ -146,6 +149,14 @@ main(int argc, char *argv[])
 			break;
 		case 'I':
 			issuer(config, optarg);
+			break;
+		case 'i':
+			if (cert_load_issuer_key(cert, optarg) == 0)
+				err(1, "cert_load_issuer_key: %s", optarg);
+			break;
+		case 'k':
+			if (cert_load_subject_key(cert, optarg) == 0)
+				err(1, "cert_load_subject_key: %s", optarg);
 			break;
 		case 'S':
 			subject(config, optarg);
@@ -183,9 +194,6 @@ main(int argc, char *argv[])
 
 	cert_config_notBefore(config, notBefore);
 	cert_config_notAfter(config, notAfter);
-
-	if ((cert = cert_new()) == NULL)
-		err(1, "cert_new");
 
 	cert_create(cert, config);
 	cert_config_free(config);

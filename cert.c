@@ -53,8 +53,12 @@
 static int
 cert_generate_keys(struct cert *cert)
 {
-	if ((cert->key = keypair_generate(cert)) == NULL)
+	if (cert->subject == NULL &&
+	    (cert->subject = keypair_generate(cert)) == NULL)
 		return 0;
+
+	if (cert->issuer == NULL)
+		cert->issuer = cert->subject;
 
 	return 1;
 }
@@ -654,7 +658,7 @@ cert_key_data(struct cert *cert, uint8_t **data, size_t *size)
 		goto err;
 	}
 
-	if (PEM_write_bio_PrivateKey(bio, cert->key, NULL, NULL, 0, NULL,
+	if (PEM_write_bio_PrivateKey(bio, cert->subject, NULL, NULL, 0, NULL,
 	   NULL) == 0) {
 		cert->errstr = "PEM_write_bio_PrivateKey";
 		return 0;
@@ -885,6 +889,8 @@ cert_new(void)
 	if (cert == NULL)
 		return NULL;
 
+	memset(cert, 0, sizeof *cert);
+
 	if ((cert->x509 = X509_new()) == NULL) {
 		free(cert);
 		return NULL;
@@ -899,6 +905,42 @@ cert_free(struct cert *cert)
 	X509_free(cert->x509);
 
 	free(cert);
+}
+
+static int
+cert_load_key(struct cert *cert, EVP_PKEY **key, const char *path)
+{
+	FILE *fh;
+
+	if ((fh = fopen(path, "r")) == NULL) {
+		cert->errstr = "fopen";
+		return 0;
+	}
+
+	if (PEM_read_PrivateKey(fh, key, NULL, NULL) == 0) {
+		cert->errstr = "fclose";
+		fclose(fh);
+		return 0;
+	}
+
+	if (fclose(fh) == EOF) {
+		cert->errstr = "fclose";
+		return 0;
+	}
+
+	return 1;
+}
+
+int
+cert_load_issuer_key(struct cert *cert, const char *path)
+{
+	return cert_load_key(cert, &cert->issuer, path);
+}
+
+int
+cert_load_subject_key(struct cert *cert, const char *path)
+{
+	return cert_load_key(cert, &cert->subject, path);
 }
 
 int
