@@ -306,9 +306,9 @@ cert_set_validity(struct cert *cert)
 }
 
 static int
-cert_set_subject_public_key_info(struct cert *cert, EVP_PKEY *subject_key)
+cert_set_subject_public_key_info(struct cert *cert)
 {
-	if (!X509_set_pubkey(cert->x509, subject_key)) {
+	if (!X509_set_pubkey(cert->x509, cert->subject)) {
 		cert->errstr = "X509_set_pubkey";
 		return 0;
 	}
@@ -354,11 +354,11 @@ cert_set_basic_constraints(struct cert *cert)
 }
 
 static int
-cert_set_subject_key_identifier(struct cert *cert, EVP_PKEY *subject_key)
+cert_set_subject_key_identifier(struct cert *cert)
 {
 	X509_EXTENSION *ext;
 
-	if ((ext = ext_subject_key_identifier_new(subject_key)) == NULL) {
+	if ((ext = ext_subject_key_identifier_new(cert->subject)) == NULL) {
 		cert->errstr = "ext_subject_key_identifier_new";
 		return 0;
 	}
@@ -370,7 +370,7 @@ cert_set_subject_key_identifier(struct cert *cert, EVP_PKEY *subject_key)
 }
 
 static int
-cert_set_authority_key_identifier(struct cert *cert, EVP_PKEY *issuer_key)
+cert_set_authority_key_identifier(struct cert *cert)
 {
 	X509_EXTENSION *ext;
 
@@ -380,7 +380,7 @@ cert_set_authority_key_identifier(struct cert *cert, EVP_PKEY *issuer_key)
 	 * Key Identifier MUST be present; MUST omit authorityCertIssuer and
 	 * authorityCertSerialNumber.
 	 */
-	if ((ext = ext_authority_key_identifier_new(issuer_key)) == NULL) {
+	if ((ext = ext_authority_key_identifier_new(cert->issuer)) == NULL) {
 		cert->errstr = "ext_authority_key_identifier_new";
 		return 0;
 	}
@@ -540,14 +540,13 @@ cert_set_certificate_policies(struct cert *cert)
 }
 
 static int
-cert_set_extensions(struct cert *cert, EVP_PKEY *subject_key,
-    EVP_PKEY *issuer_key)
+cert_set_extensions(struct cert *cert)
 {
 	if (!cert_set_basic_constraints(cert))
 		return 0;
-	if (!cert_set_subject_key_identifier(cert, subject_key))
+	if (!cert_set_subject_key_identifier(cert))
 		return 0;
-	if (!cert_set_authority_key_identifier(cert, issuer_key))
+	if (!cert_set_authority_key_identifier(cert))
 		return 0;
 	if (!cert_set_key_usage(cert))
 		return 0;
@@ -566,9 +565,9 @@ cert_set_extensions(struct cert *cert, EVP_PKEY *subject_key,
 }
 
 static int
-cert_sign(struct cert *cert, EVP_PKEY *issuer_key)
+cert_sign(struct cert *cert)
 {
-	if (!X509_sign(cert->x509, issuer_key, EVP_sha256())) {
+	if (!X509_sign(cert->x509, cert->issuer, EVP_sha256())) {
 		cert->errstr = "X509_digest";
 		return 0;
 	}
@@ -577,8 +576,7 @@ cert_sign(struct cert *cert, EVP_PKEY *issuer_key)
 }
 
 int
-cert_from_subject_and_issuer_key(struct cert *cert, EVP_PKEY *subject_key,
-    EVP_PKEY *issuer_key)
+cert_from_subject_and_issuer_key(struct cert *cert)
 {
 	if (!cert_set_version(cert))
 		return 0;
@@ -592,12 +590,12 @@ cert_from_subject_and_issuer_key(struct cert *cert, EVP_PKEY *subject_key,
 		return 0;
 	if (!cert_set_validity(cert))
 		return 0;
-	if (!cert_set_subject_public_key_info(cert, subject_key))
+	if (!cert_set_subject_public_key_info(cert))
 		return 0;
-	if (!cert_set_extensions(cert, subject_key, issuer_key))
+	if (!cert_set_extensions(cert))
 		return 0;
 
-	if (!cert_sign(cert, issuer_key))
+	if (!cert_sign(cert))
 		return 0;
 
 	return 1;
@@ -959,7 +957,7 @@ cert_create(struct cert *cert, struct cert_config *config)
 	if (!cert_generate_keys(cert))
 		return 0;
 
-	cert_from_subject_and_issuer_key(cert, cert->key, cert->key);
+	cert_from_subject_and_issuer_key(cert);
 
 	return 1;
 }
