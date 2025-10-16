@@ -17,6 +17,8 @@
 #ifndef CERT_H
 #define CERT_H
 
+#include <openssl/x509.h>
+
 struct cert_config;
 struct cert;
 
