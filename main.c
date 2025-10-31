@@ -61,6 +61,8 @@ issuer(struct cert_config *config, char *name)
 		cert_config_issuer_cn(config, name);
 	else if (strcmp(key, "SER") == 0)
 		cert_config_issuer_ser(config, name);
+	else if (strcmp(key, "AIA") == 0)
+		cert_config_authority_info_access(config, name);
 	else
 		errx(1, "unknown issuer name: %s", key);
 }

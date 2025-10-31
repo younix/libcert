@@ -33,6 +33,7 @@ void	cert_config_notBefore(struct cert_config *, time_t);
 void	cert_config_notAfter(struct cert_config *, time_t);
 int	cert_config_add_crl_uri(struct cert_config *, const char *);
 void	cert_config_set_cps(struct cert_config *, const char *);
+void	cert_config_authority_info_access(struct cert_config *, const char *);
 
 void	cert_config_issuer_c(struct cert_config *, const char *);
 void	cert_config_issuer_o(struct cert_config *, const char *);

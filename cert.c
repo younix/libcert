@@ -456,14 +456,17 @@ static int
 cert_set_authority_info_access(struct cert *cert)
 {
 	X509_EXTENSION *ext;
-	const struct access_method am = {
+	struct access_method am = {
 		.nid = NID_ad_ca_issuers,
-		.uri = "rsync://foo.baz/whee",
+		.uri = cert->config->aia,
 	};
 
 	/* In a self-signed certificate, this extension MUST be omitted. */
 	if (cert->config->kind == CERT_KIND_TA)
 		return 1;
+
+	if (am.uri == NULL)
+		am.uri = "rsync://example.com/info";
 
 	if ((ext = ext_authority_info_access_new(&am)) == NULL) {
 		cert->errstr = "ext_authority_info_access_new";
@@ -839,6 +842,12 @@ void
 cert_config_set_cps(struct cert_config *config, const char *cps)
 {
 	config->cps = strdup(cps);
+}
+
+void
+cert_config_authority_info_access(struct cert_config *config, const char *aia)
+{
+	config->aia = strdup(aia);
 }
 
 int

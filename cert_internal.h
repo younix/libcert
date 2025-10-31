@@ -98,6 +98,7 @@ struct cert_config {
 	struct name	  issuer;
 	struct name	  subject;
 	char		 *cps;		/* Certification Practice Statement*/
+	char		 *aia;		/* Authority Infomation Access */
 };
 
 struct cert {
