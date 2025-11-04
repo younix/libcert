@@ -34,6 +34,12 @@ and
 .Fn cert_load_subject_key
 load the keys for issuer und subject of the certificate from PEM files in
 .Ar path .
+.Pp
+By default a subject key is generated if its not given via
+.Fn cert_load_subject_key .
+When an issuer key is not given via
+.Fn cert_load_issuer_key
+the subject key is also used the issuer key.
 .Sh RETURN VALUES
 The functions
 .Fn cert_load_issuer_key
