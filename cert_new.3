@@ -32,14 +32,13 @@ The
 .Fn cert_new
 functions creates a new certificate instance.
 .Fn cert_free
-destroys this instance.
+frees this instance and all its depending resources.
 .Sh RETURN VALUES
 .Fn cert_new
 returns NULL on error or an out of memory condition.
-.Pp
-.Fn cert_free
 .Sh SEE ALSO
-.Xr cert_config_new 3
+.Xr cert_config_new 3 ,
+.Xr cert_load 3
 .Sh STANDARDS
 .%R RFC 5280
 .Sh AUTHORS
