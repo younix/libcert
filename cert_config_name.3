@@ -66,17 +66,109 @@
 .Sh DESCRIPTION
 The
 .Fn cert_config_issuer_c
-sets the issuer country to c.
-.sp
-.Fn cert_config_free
-destroys this context.
-.Sh RETURN VALUES
-.Fn cert_config_new
-returns NULL on error or an out of memory condition.
+function sets the issuer
+.Dq country
+to
+.Ar c .
 .Pp
-.Fn cert_config_free
+The
+.Fn cert_config_issuer_o
+function sets the issuer
+.Dq organization
+to
+.Ar o .
+.Pp
+The
+.Fn cert_config_issuer_ou
+function sets the issuer
+.Dq organization unit
+to
+.Ar ou .
+.Pp
+The
+.Fn cert_config_issuer_dnq
+function sets the issuer
+.Dq distinguished name qualifier
+to
+.Ar dnq .
+.Pp
+The
+.Fn cert_config_issuer_st
+function sets the issuer
+.Dq state or province name
+to
+.Ar st .
+.Pp
+The
+.Fn cert_config_issuer_cn
+function sets the issuer
+.Dq common name
+to
+.Ar cn .
+The default value is
+.Dq localhost ,
+if no other issuer name was set.
+.Pp
+The
+.Fn cert_config_issuer_ser
+function sets the issuer
+.Dq serial number
+to
+.Ar ser .
+.Pp
+The
+.Fn cert_config_subject_c
+function sets the subject
+.Dq country
+to
+.Ar c .
+.Pp
+The
+.Fn cert_config_subject_o
+function sets the subject
+.Dq organization
+to
+.Ar o .
+.Pp
+The
+.Fn cert_config_subject_ou
+function sets the subject
+.Dq organization unit
+to
+.Ar ou .
+.Pp
+The
+.Fn cert_config_subject_dnq
+function sets the subject
+.Dq distinguished name qualifier
+to
+.Ar dnq .
+.Pp
+The
+.Fn cert_config_subject_st
+function sets the subject
+.Dq state or province name
+to
+.Ar st .
+.Pp
+The
+.Fn cert_config_subject_cn
+function sets the subject
+.Dq common name
+to
+.Ar cn .
+The default value is
+.Dq localhost ,
+if no other subject name was set.
+.Pp
+The
+.Fn cert_config_subject_ser
+function sets the subject
+.Dq serial number
+to
+.Ar ser .
 .Sh SEE ALSO
-.Xr cert_new 3
+.Xr cert_config_new 3
 .Sh STANDARDS
 .%R RFC 5280
 .Sh AUTHORS
