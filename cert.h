@@ -25,16 +25,16 @@ struct cert;
 struct cert_config *
 	cert_config_new(void);
 void	cert_config_free(struct cert_config *);
+
+/* Basics */
 void	cert_config_set_ee(struct cert_config *);
 void	cert_config_set_ca(struct cert_config *);
 void	cert_config_set_ta(struct cert_config *);
 void	cert_config_serial(struct cert_config *, uint64_t);
 void	cert_config_notBefore(struct cert_config *, time_t);
 void	cert_config_notAfter(struct cert_config *, time_t);
-int	cert_config_add_crl_uri(struct cert_config *, const char *);
-void	cert_config_set_cps(struct cert_config *, const char *);
-void	cert_config_authority_info_access(struct cert_config *, const char *);
 
+/* Issuer names */
 void	cert_config_issuer_c(struct cert_config *, const char *);
 void	cert_config_issuer_o(struct cert_config *, const char *);
 void	cert_config_issuer_ou(struct cert_config *, const char *);
@@ -43,6 +43,7 @@ void	cert_config_issuer_st(struct cert_config *, const char *);
 void	cert_config_issuer_cn(struct cert_config *, const char *);
 void	cert_config_issuer_ser(struct cert_config *, const char *);
 
+/* Subject names */
 void	cert_config_subject_c(struct cert_config *, const char *);
 void	cert_config_subject_o(struct cert_config *, const char *);
 void	cert_config_subject_ou(struct cert_config *, const char *);
@@ -50,6 +51,11 @@ void	cert_config_subject_dnq(struct cert_config *, const char *);
 void	cert_config_subject_st(struct cert_config *, const char *);
 void	cert_config_subject_cn(struct cert_config *, const char *);
 void	cert_config_subject_ser(struct cert_config *, const char *);
+
+/* Extensions */
+int	cert_config_add_crl_uri(struct cert_config *, const char *);
+void	cert_config_set_cps(struct cert_config *, const char *);
+void	cert_config_authority_info_access(struct cert_config *, const char *);
 
 struct cert *
 	cert_new(void);
