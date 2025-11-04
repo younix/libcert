@@ -1,0 +1,58 @@
+.\"	$OpenBSD$
+.\"
+.\" Copyright (c) 2025 Jan Klemkow <j.klemkow@wemelug.de>
+.\"
+.\" Permission to use, copy, modify, and distribute this software for any
+.\" purpose with or without fee is hereby granted, provided that the above
+.\" copyright notice and this permission notice appear in all copies.
+.\"
+.\" THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+.\" WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+.\" MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+.\" ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+.\" WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+.\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+.\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+.\"
+.Dd $Mdocdate$
+.Dt LIBCERT 3
+.Os
+.Sh NAME
+.Nm cert_config_serial ,
+.Nm cert_config_notBefore ,
+.Nm cert_config_notAfter
+.Nd certificate type
+.Sh SYNOPSIS
+.In cert.h
+.Ft void
+.Fn cert_config_serial "struct cert_config *config" "uint64_t serial"
+.Ft void
+.Fn cert_config_notBefore "struct cert_config *config" "time_t date"
+.Ft void
+.Fn cert_config_notAfter "struct cert_config *config" "time_t date"
+.Sh DESCRIPTION
+The
+.Fn cert_config_serial
+functions sets the serial number of the certificate to
+.Ar serial .
+The default value is a random number.
+.Pp
+The
+.Fn cert_config_notBefore
+functions sets the validity of the certificate to invalid before
+.Ar date .
+The default value is now.
+.Pp
+The
+.Fn cert_config_notAfter
+functions sets the validity of the certificate to invalid after
+.Ar date .
+The default value is a reasonable amount of time after the notBefore value.
+See
+.Fn cert_config_notBefore .
+.Sh SEE ALSO
+.Xr cert_config_new 3
+.Sh STANDARDS
+.%R RFC 5280
+.Sh AUTHORS
+.An Jan Klemkow Aq Mt j.klemkow@wemelug.de
