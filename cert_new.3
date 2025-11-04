@@ -1,0 +1,45 @@
+.\"	$OpenBSD$
+.\"
+.\" Copyright (c) 2025 Jan Klemkow <j.klemkow@wemelug.de>
+.\"
+.\" Permission to use, copy, modify, and distribute this software for any
+.\" purpose with or without fee is hereby granted, provided that the above
+.\" copyright notice and this permission notice appear in all copies.
+.\"
+.\" THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+.\" WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+.\" MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+.\" ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+.\" WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+.\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+.\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+.\"
+.Dd $Mdocdate$
+.Dt LIBCERT 3
+.Os
+.Sh NAME
+.Nm cert_new ,
+.Nm cert_free
+.Nd certificate library
+.Sh SYNOPSIS
+.In cert.h
+.Ft struct cert *
+.Fn cert_new void
+.Ft void
+.Fn cert_free "struct cert *cert"
+.Sh DESCRIPTION
+The
+.Fn cert_new
+functions creates a new certificate instance.
+.Fn cert_free
+destroys this instance.
+.Sh RETURN VALUES
+.Fn cert_new
+returns NULL on error or an out of memory condition.
+.Pp
+.Fn cert_free
+.Sh SEE ALSO
+.Xr cert_config_new 3
+.Sh STANDARDS
+.Sh AUTHORS
+.An Jan Klemkow Aq Mt j.klemkow@wemelug.de
