@@ -38,4 +38,4 @@ test: cert cert-static test/connect
 	./cert-static
 	LD_LIBRARY_PATH=. ./cert
 	LD_LIBRARY_PATH=. test/connect
-	mandoc -T lint *.3
+	mandoc -T lint *.3 *.1
