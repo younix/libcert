@@ -1,0 +1,53 @@
+.\"	$OpenBSD$
+.\"
+.\" Copyright (c) 2025 Jan Klemkow <j.klemkow@wemelug.de>
+.\"
+.\" Permission to use, copy, modify, and distribute this software for any
+.\" purpose with or without fee is hereby granted, provided that the above
+.\" copyright notice and this permission notice appear in all copies.
+.\"
+.\" THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+.\" WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+.\" MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+.\" ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+.\" WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+.\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+.\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+.\"
+.Dd $Mdocdate$
+.Dt LIBCERT 3
+.Os
+.Sh NAME
+.Nm cert_config_set_ee ,
+.Nm cert_config_set_ca ,
+.Nm cert_config_set_ta
+.Nd certificate type
+.Sh SYNOPSIS
+.In cert.h
+.Ft void
+.Fn cert_config_set_ee "struct cert_config *config"
+.Ft void
+.Fn cert_config_set_ca "struct cert_config *config"
+.Ft void
+.Fn cert_config_set_ta "struct cert_config *config"
+.Sh DESCRIPTION
+The
+.Fn cert_config_set_ee
+functions sets the certificate type to
+.Dq End Entity .
+.Pp
+The
+.Fn cert_config_set_ca
+functions sets the certificate type to
+.Dq Certificate Authority .
+.Pp
+The
+.Fn cert_config_set_ta
+functions sets the certificate type to
+.Dq Trust Anchor .
+.Sh SEE ALSO
+.Xr cert_config_new 3
+.Sh STANDARDS
+.%R RFC 5280
+.Sh AUTHORS
+.An Jan Klemkow Aq Mt j.klemkow@wemelug.de
