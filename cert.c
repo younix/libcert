@@ -703,6 +703,7 @@ cert_config_free(struct cert_config *config)
 		free(config->crl_list[config->crl_len]);
 
 	free(config->cps);
+	free(config->aia);
 	free(config->crl_list);
 
 	free(config->issuer.c);
