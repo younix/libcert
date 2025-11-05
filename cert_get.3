@@ -1,0 +1,58 @@
+.\"	$OpenBSD$
+.\"
+.\" Copyright (c) 2025 Jan Klemkow <j.klemkow@wemelug.de>
+.\"
+.\" Permission to use, copy, modify, and distribute this software for any
+.\" purpose with or without fee is hereby granted, provided that the above
+.\" copyright notice and this permission notice appear in all copies.
+.\"
+.\" THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+.\" WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+.\" MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+.\" ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+.\" WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+.\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+.\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+.\"
+.Dd $Mdocdate$
+.Dt LIBCERT 3
+.Os
+.Sh NAME
+.Nm cert_crt_data ,
+.Nm cert_key_data
+.Nd certificate library
+.Sh SYNOPSIS
+.In cert.h
+.Ft int
+.Fn cert_crt_data "struct cert *cert" "uint8_t *buf" "size_t *size"
+.Ft int
+.Fn cert_key_data "struct cert *cert" "uint8_t *buf" "size_t *size"
+.Sh DESCRIPTION
+The function
+.Fn cert_crt_data
+set the pointer
+.Ar buf
+to the generated x509 certificate data in PEM format and sets
+.Ar size
+to its size.
+.Pp
+The
+.Fn cert_key_data
+function sets
+.Ar buf
+and
+.Ar size
+to the subject key of the generated certificate.
+.Sh RETURN VALUES
+The functions
+.Fn cert_crt_data
+and
+.Fn cert_key_data
+return 1 on success and 0 on error.
+.Sh SEE ALSO
+.Xr cert_load 3 ,
+.Xr cert_new 3
+.Sh STANDARDS
+.%R RFC 5280
+.Sh AUTHORS
+.An Jan Klemkow Aq Mt j.klemkow@wemelug.de
